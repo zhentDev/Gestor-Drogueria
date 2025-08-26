@@ -1,0 +1,14 @@
+{
+  "name": "gestor-drogeria",
+  "version": "1.0.0",
+  "description": "Aplicación de escritorio para realizar la gestión y compra de los productos de la drogería.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jesus Caballero",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^37.3.1"
+  }
+}
