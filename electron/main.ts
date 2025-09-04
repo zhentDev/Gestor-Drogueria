@@ -2,6 +2,13 @@ import { app, BrowserWindow } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
+// import { session } from 'electron'
+// import os from 'node:os';
+
+// const reactDevToolsPath = path.join(os.homedir(),
+//   'AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\fmkadmapgofadopljbjfkapdkoienihi\\6.1.5_0'
+// )
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -32,9 +39,9 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
       nodeIntegration: true,
-      contextIsolation: false,
+      contextIsolation: true,
     },
-    fullscreen: true,
+    fullscreen: false,
   })
 
   // Test active push message to Renderer-process.
@@ -68,4 +75,23 @@ app.on('activate', () => {
   }
 })
 
-app.whenReady().then(createWindow)
+app.whenReady().then(() => {
+  installExtension([REACT_DEVELOPER_TOOLS])
+    .then(([react]) => {
+      console.log(`Added Extensions:  ${react.name}`)
+      createWindow()
+    })
+    .catch((err) => console.log('An error occurred: ', err));
+});
+
+// app.whenReady().then(async () => {
+//   try {
+//     await installExtension(REACT_DEVELOPER_TOOLS);
+//     console.log('React DevTools installed');
+//   } catch (err) {
+//     console.error('Failed to install React DevTools:', err);
+//   }
+
+//   createWindow(); // <-- mover aquí después de instalar la extensión
+// });
+
