@@ -1,6 +1,6 @@
-
-// models/audit_log.model.js
-const AuditLog = sequelize.define('AuditLog', {
+// models/audit_log.js
+module.exports = (sequelize, DataTypes) => {
+  const AuditLog = sequelize.define('AuditLog', {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -9,19 +9,19 @@ const AuditLog = sequelize.define('AuditLog', {
     user_id: {
       type: DataTypes.INTEGER,
       references: {
-        model: User,
+        model: 'users', // importante: aquí va el nombre de la tabla, no la clase User
         key: 'id'
       }
     },
     action: {
-      type: DataTypes.STRING(100),
-      allowNull: false
-    },
-    entity: {
       type: DataTypes.STRING(50),
       allowNull: false
     },
-    entity_id: {
+    table_name: {
+      type: DataTypes.STRING(50),
+      allowNull: true
+    },
+    record_id: {
       type: DataTypes.INTEGER,
       allowNull: true
     },
@@ -40,9 +40,16 @@ const AuditLog = sequelize.define('AuditLog', {
     user_agent: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
     }
   }, {
     tableName: 'audit_logs',
+    createdAt: 'created_at',
     updatedAt: false
   });
-  
+
+  return AuditLog;
+};

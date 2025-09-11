@@ -69,7 +69,7 @@ module.exports = router;
 
 // ==========================================
 // routes/products.routes.js
-// ==========================================
+// ========================================== 
 const productRoutes = `
 const express = require('express');
 const router = express.Router();

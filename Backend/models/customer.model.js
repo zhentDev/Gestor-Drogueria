@@ -1,19 +1,23 @@
-// models/supplier.model.js
+// models/customer.js
 module.exports = (sequelize, DataTypes) => {
-    const Supplier = sequelize.define('Supplier', {
+    const Customer = sequelize.define('Customer', {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
       },
-      name: {
-        type: DataTypes.STRING(100),
-        allowNull: false
-      },
-      nit: {
+      document_type: {
         type: DataTypes.STRING(20),
-        unique: true,
-        allowNull: true
+        defaultValue: 'CC'
+      },
+      document_number: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        unique: true
+      },
+      full_name: {
+        type: DataTypes.STRING(200),
+        allowNull: false
       },
       phone: {
         type: DataTypes.STRING(20),
@@ -30,13 +34,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
         allowNull: true
       },
-      contact_person: {
-        type: DataTypes.STRING(100),
+      birth_date: {
+        type: DataTypes.DATE,
         allowNull: true
-      },
-      is_active: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true
       },
       created_at: {
         type: DataTypes.DATE,
@@ -47,12 +47,12 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: DataTypes.NOW
       }
     }, {
-      tableName: 'suppliers',
-      timestamps: false
+      tableName: 'customers',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at'
     });
-  
 
   
-    return Supplier;
+    return Customer;
   };
   

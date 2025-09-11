@@ -12,7 +12,7 @@ CREATE TABLE users (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-
+ 
 -- Tabla de Categorías de Productos
 CREATE TABLE categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -144,16 +144,20 @@ CREATE TABLE cash_registers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     opening_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    closing_date DATETIME,
-    initial_balance DECIMAL(10,2) NOT NULL,
-    final_balance DECIMAL(10,2),
-    expected_balance DECIMAL(10,2),
+    closing_date DATETIME, 
+    initial_amount DECIMAL(10,2) DEFAULT 0,     -- en vez de initial_balance
+    sales_total DECIMAL(10,2) DEFAULT 0,       -- nuevo
+    expenses_total DECIMAL(10,2) DEFAULT 0,    -- nuevo
+    expected_amount DECIMAL(10,2) DEFAULT 0,   -- en vez de expected_balance
+    actual_amount DECIMAL(10,2),               -- en vez de final_balance
     difference DECIMAL(10,2),
-    status VARCHAR(20) DEFAULT 'abierta', -- abierta, cerrada
+    status VARCHAR(20) DEFAULT 'open',         -- mejor en inglés, consistente con modelo
     notes TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+
 
 -- Tabla de Movimientos de Caja
 CREATE TABLE cash_movements (

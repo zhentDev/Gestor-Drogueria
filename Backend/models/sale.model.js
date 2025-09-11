@@ -1,6 +1,6 @@
-
 // models/sale.model.js
-const Sale = sequelize.define('Sale', {
+module.exports = (sequelize, DataTypes) => {
+  const Sale = sequelize.define('Sale', {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -11,30 +11,23 @@ const Sale = sequelize.define('Sale', {
       unique: true,
       allowNull: false
     },
+    customer_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     user_id: {
       type: DataTypes.INTEGER,
-      references: {
-        model: User,
-        key: 'id'
-      }
+      allowNull: false
     },
-    customer_name: {
-      type: DataTypes.STRING(200),
-      defaultValue: 'Cliente General'
-    },
-    customer_nit: {
-      type: DataTypes.STRING(50),
-      defaultValue: 'C/F'
+    cash_register_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     },
     sale_date: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW
     },
     subtotal: {
-      type: DataTypes.DECIMAL(12, 2),
-      defaultValue: 0
-    },
-    discount: {
       type: DataTypes.DECIMAL(10, 2),
       defaultValue: 0
     },
@@ -42,18 +35,40 @@ const Sale = sequelize.define('Sale', {
       type: DataTypes.DECIMAL(10, 2),
       defaultValue: 0
     },
-    total_amount: {
-      type: DataTypes.DECIMAL(12, 2),
+    discount: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0
+    },
+    total: {
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false
     },
     payment_method: {
-      type: DataTypes.ENUM('cash', 'card', 'transfer'),
-      defaultValue: 'cash'
+      type: DataTypes.STRING(20),
+      defaultValue: 'efectivo'
+    },
+    amount_paid: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true
+    },
+    change_amount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true
     },
     status: {
-      type: DataTypes.ENUM('completed', 'cancelled', 'pending'),
-      defaultValue: 'completed'
+      type: DataTypes.STRING(20),
+      defaultValue: 'completada'
+    },
+    notes: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   }, {
-    tableName: 'sales'
+    tableName: 'sales',
+    timestamps: false
   });
+
+
+
+  return Sale;
+};

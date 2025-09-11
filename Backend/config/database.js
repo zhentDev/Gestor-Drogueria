@@ -3,20 +3,20 @@ const { Sequelize } = require('sequelize');
 const path = require('path');
 const dotenv = require('dotenv');
 
-// Detecta entorno (default = dev)
-const env = process.env.NODE_ENV || 'dev';
+// Detecta entorno (default = development)
+const env = process.env.NODE_ENV || 'development';
 
 // Selecciona archivo .env según el entorno
 let envFile;
 switch (env) {
-  case 'prod':
-    envFile = '.env.prod';
+  case 'production':
+    envFile = '.env.production';
     break;
   case 'test':
     envFile = '.env.test';
     break;
   default:
-    envFile = '.env.dev';
+    envFile = '.env.development';
 }
 
 dotenv.config({ path: path.resolve(__dirname, `../${envFile}`) });
@@ -38,7 +38,7 @@ if (process.env.DATABASE_URL) {
 
 // Inicializa Sequelize
 const sequelize = new Sequelize(databaseUrl, {
-  logging: env === 'dev' ? console.log : false,
+  logging: env === 'development' ? console.log : false,
   define: {
     timestamps: true,   // agrega created_at y updated_at
     underscored: true,  // nombres en snake_case

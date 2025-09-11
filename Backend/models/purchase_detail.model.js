@@ -1,6 +1,6 @@
-
 // models/purchase_detail.model.js
-const PurchaseDetail = sequelize.define('PurchaseDetail', {
+module.exports = (sequelize, DataTypes) => {
+  const PurchaseDetail = sequelize.define('PurchaseDetail', {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -8,17 +8,11 @@ const PurchaseDetail = sequelize.define('PurchaseDetail', {
     },
     purchase_id: {
       type: DataTypes.INTEGER,
-      references: {
-        model: Purchase,
-        key: 'id'
-      }
+      allowNull: false
     },
     product_id: {
       type: DataTypes.INTEGER,
-      references: {
-        model: Product,
-        key: 'id'
-      }
+      allowNull: false
     },
     quantity: {
       type: DataTypes.INTEGER,
@@ -32,11 +26,20 @@ const PurchaseDetail = sequelize.define('PurchaseDetail', {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false
     },
-    expiration_date: {
+    expiry_date: {  // 👈 mantener igual que en la tabla
       type: DataTypes.DATE,
+      allowNull: true
+    },
+    batch_number: { // 👈 faltaba en el modelo
+      type: DataTypes.STRING(50),
       allowNull: true
     }
   }, {
-    tableName: 'purchase_details'
+    tableName: 'purchase_details',
+    timestamps: false
   });
-  
+
+
+
+  return PurchaseDetail;
+};

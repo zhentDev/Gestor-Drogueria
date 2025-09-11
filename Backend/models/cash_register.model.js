@@ -1,5 +1,6 @@
-// models/cash_register.model.js
-const CashRegister = sequelize.define('CashRegister', {
+// models/cash_register.js
+module.exports = (sequelize, DataTypes) => {
+  const CashRegister = sequelize.define('CashRegister', {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -7,8 +8,9 @@ const CashRegister = sequelize.define('CashRegister', {
     },
     user_id: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       references: {
-        model: User,
+        model: 'users', // nombre de la tabla
         key: 'id'
       }
     },
@@ -50,7 +52,18 @@ const CashRegister = sequelize.define('CashRegister', {
     },
     notes: {
       type: DataTypes.TEXT
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
     }
   }, {
-    tableName: 'cash_registers'
+    tableName: 'cash_registers',
+    createdAt: 'created_at',
+    updatedAt: false
   });
+
+
+
+  return CashRegister;
+};

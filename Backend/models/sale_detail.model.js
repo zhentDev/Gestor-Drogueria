@@ -1,6 +1,6 @@
-
 // models/sale_detail.model.js
-const SaleDetail = sequelize.define('SaleDetail', {
+module.exports = (sequelize, DataTypes) => {
+  const SaleDetail = sequelize.define('SaleDetail', {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -8,17 +8,11 @@ const SaleDetail = sequelize.define('SaleDetail', {
     },
     sale_id: {
       type: DataTypes.INTEGER,
-      references: {
-        model: Sale,
-        key: 'id'
-      }
+      allowNull: false
     },
     product_id: {
       type: DataTypes.INTEGER,
-      references: {
-        model: Product,
-        key: 'id'
-      }
+      allowNull: false
     },
     quantity: {
       type: DataTypes.INTEGER,
@@ -37,6 +31,10 @@ const SaleDetail = sequelize.define('SaleDetail', {
       allowNull: false
     }
   }, {
-    tableName: 'sale_details'
+    tableName: 'sale_details',
+    timestamps: false
   });
-  
+
+
+  return SaleDetail;
+};

@@ -1,5 +1,6 @@
 // models/product.model.js
-const Product = sequelize.define('Product', {
+module.exports = (sequelize, DataTypes) => {
+  const Product = sequelize.define('Product', {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -18,8 +19,8 @@ const Product = sequelize.define('Product', {
       type: DataTypes.TEXT,
       allowNull: true
     },
-    category: {
-      type: DataTypes.STRING(100),
+    category_id: {
+      type: DataTypes.INTEGER,
       allowNull: true
     },
     unit: {
@@ -34,17 +35,25 @@ const Product = sequelize.define('Product', {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false
     },
-    current_stock: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0
-    },
     min_stock: {
       type: DataTypes.INTEGER,
       defaultValue: 10
     },
+    current_stock: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
     max_stock: {
       type: DataTypes.INTEGER,
       defaultValue: 1000
+    },
+    location: {
+      type: DataTypes.STRING(50),
+      allowNull: true
+    },
+    requires_prescription: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     },
     expiration_date: {
       type: DataTypes.DATE,
@@ -53,7 +62,19 @@ const Product = sequelize.define('Product', {
     is_active: {
       type: DataTypes.BOOLEAN,
       defaultValue: true
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
     }
   }, {
-    tableName: 'products'
+    tableName: 'products',
+    timestamps: false // porque ya defines created_at y updated_at manualmente
   });
+
+  return Product;
+};
