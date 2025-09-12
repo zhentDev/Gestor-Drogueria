@@ -1,0 +1,223 @@
+#!/usr/bin/env node
+'use strict';
+
+/**
+ * Entrypoint mejorado para Express + Sequelize
+ * - Logs detallados
+ * - DB check (sequelize.authenticate)
+ * - Optional: MIGRATE (run migrations) or SYNC_FORCE (dangerous)
+ * - Graceful shutdown (SIGINT/SIGTERM)
+ * - Optional Sentry if SENTRY_DSN provided and package installed
+ * - Optional colored logs with chalk if installed
+ */
+
+const app = require('../app');
+const http = require('http');
+const os = require('os');
+const { sequelize } = require('../models'); // tu models/index.js debe exportar sequelize
+require('dotenv-flow').config();
+
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const PORT = normalizePort(process.env.PORT || '3000');
+const HOST = process.env.HOST || '0.0.0.0';
+
+// try to require chalk for colored output, fallback to noop
+let chalk;
+try {
+  chalk = require('chalk');
+} catch (e) {
+  chalk = {
+    green: (s) => s,
+    yellow: (s) => s,
+    red: (s) => s,
+    blue: (s) => s,
+    magenta: (s) => s,
+    cyan: (s) => s
+  };
+}
+
+// optional Sentry init (only if env var and package present)
+if (process.env.SENTRY_DSN) {
+  try {
+    const Sentry = require('@sentry/node');
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN,
+      environment: NODE_ENV
+    });
+    console.log(chalk.magenta('♻️  Sentry initialized'));
+  } catch (e) {
+    console.warn(chalk.yellow('⚠️  SENTRY_DSN provided but @sentry/node not installed — skipping Sentry init'));
+  }
+}
+
+/**
+ * create server
+ */
+app.set('port', PORT);
+const server = http.createServer(app);
+
+/**
+ * Start server: DB check -> optional migrations/sync -> listen
+ */
+async function start() {
+  try {
+    console.log(chalk.cyan('Starting server...'));
+
+    // 1) Validate important envs (example)
+    if (!process.env.NODE_ENV) {
+      console.warn(chalk.yellow('NODE_ENV not set — defaulting to "development"'));
+    }
+
+    // 2) DB connection check
+    let dbOk = false;
+    try {
+      await sequelize.authenticate();
+      dbOk = true;
+      console.log(chalk.green('✅ Database connection OK'));
+    } catch (dbErr) {
+      console.error(chalk.red('❌ Database connection failed:'), dbErr.message);
+      // if production, abort startup; if development, log and continue optionally
+      if (NODE_ENV === 'production') throw dbErr;
+      console.warn(chalk.yellow('Continuing startup in non-production despite DB error (development).'));
+    }
+
+    // 3) Optional: run migrations or sync
+    // Use env flags to control dangerous behaviour:
+    // MIGRATE=true -> run migrations (if you use umzug or sequelize-cli)
+    // SYNC_FORCE=true -> run sequelize.sync({ force: true }) -- DANGEROUS
+    if (process.env.MIGRATE === 'true') {
+      console.log(chalk.blue('→ MIGRATE=true; run migrations here (implement migration runner)'));
+      // TODO: plug your migration runner (umzug/sequelize-cli) here
+      // await runMigrations();
+    }
+
+    if (process.env.SYNC_FORCE === 'true') {
+      console.log(chalk.red('→ SYNC_FORCE=true DETECTED. Running sequelize.sync({ force: true }) — this will DROP DATA.'));
+      if (NODE_ENV === 'production') {
+        throw new Error('SYNC_FORCE not allowed in production');
+      } else {
+        await sequelize.sync({ force: true });
+        console.log(chalk.green('✅ sequelize.sync({ force: true }) completed'));
+      }
+    }
+
+    // 4) Start HTTP server
+    server.listen(PORT, HOST, () => {
+      prettyStartupLog({ host: HOST, port: PORT, dbOk });
+    });
+
+    // 5) Hooks
+    server.on('error', onError);
+    server.on('listening', onListening);
+
+    // graceful shutdown on signals
+    process.on('SIGINT', gracefulShutdown);
+    process.on('SIGTERM', gracefulShutdown);
+  } catch (err) {
+    console.error(chalk.red('Fatal error during startup:'), err);
+    process.exit(1);
+  }
+}
+
+/**
+ * Pretty startup log helper
+ */
+function prettyStartupLog({ host, port, dbOk }) {
+  const lines = [
+    '--------------------------------------------',
+    chalk.green('🚀 Server started'),
+    `   Env:      ${chalk.yellow(NODE_ENV)}`,
+    `   Host:     ${chalk.yellow(host)}`,
+    `   Port:     ${chalk.yellow(port)}`,
+    `   PID:      ${process.pid}`,
+    `   Node:     ${process.version}`,
+    `   Platform: ${os.type()} ${os.release()} ${os.arch()}`,
+    `   DB:       ${dbOk ? chalk.green('connected') : chalk.red('not connected')}`,
+    `   API base: http://${host}:${port}/api`,
+  ];
+  if (NODE_ENV === 'development') {
+    lines.push(`   Dev tools: http://${host}:${port}/__dev`);
+  }
+  lines.push('--------------------------------------------');
+  console.log(lines.join('\n'));
+}
+
+/**
+ * Normalize port
+ */
+function normalizePort(val) {
+  const p = parseInt(val, 10);
+  if (Number.isNaN(p)) return val;
+  if (p >= 0) return p;
+  return false;
+}
+
+/**
+ * onError handler (listen errors)
+ */
+function onError(error) {
+  if (error.syscall !== 'listen') throw error;
+  const bind = typeof PORT === 'string' ? 'Pipe ' + PORT : 'Port ' + PORT;
+  switch (error.code) {
+    case 'EACCES':
+      console.error(chalk.red(`${bind} requires elevated privileges`));
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(chalk.red(`${bind} is already in use`));
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * onListening (keeps previous behaviour but logs concretely)
+ */
+function onListening() {
+  const addr = server.address();
+  const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
+  console.log(chalk.green(`✔️  Listening on ${bind}`));
+}
+
+/**
+ * Graceful shutdown: close server, close DB connection, flush logs
+ */
+let shuttingDown = false;
+async function gracefulShutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(chalk.yellow(`\n→ Received ${signal || 'shutdown'} — closing server...`));
+  try {
+    // stop accepting new connections
+    server.close(async (err) => {
+      if (err) {
+        console.error(chalk.red('Error closing server:'), err);
+      } else {
+        console.log(chalk.green('HTTP server closed'));
+      }
+      // close DB connection
+      try {
+        await sequelize.close();
+        console.log(chalk.green('Sequelize connection closed'));
+      } catch (dbErr) {
+        console.warn(chalk.yellow('Error closing DB connection:'), dbErr.message);
+      }
+      console.log(chalk.cyan('Shutdown complete. Bye 👋'));
+      process.exit(0);
+    });
+
+    // force exit after timeout if not closed
+    setTimeout(() => {
+      console.error(chalk.red('Forcing shutdown after timeout'));
+      process.exit(1);
+    }, parseInt(process.env.SHUTDOWN_TIMEOUT_MS || '10000', 10));
+  } catch (err) {
+    console.error(chalk.red('Error during gracefulShutdown:'), err);
+    process.exit(1);
+  }
+}
+
+// start
+start();
