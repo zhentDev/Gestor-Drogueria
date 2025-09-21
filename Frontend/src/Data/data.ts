@@ -21,7 +21,7 @@ export const navBarLinks = [
     },
     {
         id: 3,
-        name: "Vender",
+        name: "Ventas",
         link: "/viewFacturacionHor",
         icon: MdSell
     },
@@ -65,7 +65,7 @@ export const subNavBarLinks = [
     {
         id: 10,
         name: "Inventarios/Masivos Precios Venta",
-        link: "/maestraProd"
+        link: "/masivoPreciosVenta"
     },
     {
         id: 11,

@@ -9,6 +9,8 @@ import Ventas from '../Pages/Ventas'
 import GestionCajas from '../Pages/GestionCajas'
 import GestionDeCaja from '../Pages/SubPages/GestionDeCaja'
 import SalidasDeCaja from '../Pages/SubPages/SalidasDeCaja'
+import Inventarios from '../Pages/Inventarios'
+import GestionDeProductos from '../Pages/SubPages/GestionDeProductos'
 
 export interface User {
   id: number | null;
@@ -69,7 +71,10 @@ function App() {
           <Route path='/menuCajas' element={<GestionCajas />}></Route>
           <Route path='/viewGestionCajas' element={<GestionDeCaja />}></Route>
           <Route path='/viewGastos' element={<SalidasDeCaja />}></Route>
-          <Route path='/viewInventarios' element={<></>}></Route>
+          <Route path='/viewInventarios' element={<Inventarios />}></Route>
+          <Route path='/maestraProd' element={<GestionDeProductos />}></Route>
+          <Route path='/viewinfoinventario' element={<></>}></Route>
+          <Route path='/masivoPreciosVenta' element={<></>}></Route>
         </Route>
         <Route path='/viewListFactura' element={
           <ProtectedRoute isAllowed={!!user.name && user.permissions?.includes("admin") ? true : false} redirectTo="/">
