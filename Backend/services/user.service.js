@@ -47,6 +47,19 @@ class UserService {
     return user;
   }
 
+  async getUserByUsername(username) {
+    const user = await User.findOne({
+      where: { username },
+      attributes: { exclude: ['password'] }
+    });
+  
+    if (!user) {
+      throw AppError.notFound('Usuario no encontrado', 'USER_NOT_FOUND');
+    }
+  
+    return user;
+  }
+
   async createUser(userData) {
     // Verificar si el username o email ya existen
     const existingUser = await User.findOne({

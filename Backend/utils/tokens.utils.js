@@ -28,8 +28,8 @@ const saveRefreshToken = async (tokenPlain, userId) => {
 };
 
 const findRefreshTokenByPlain = async (tokenPlain) => {
-  const tokenHash = hashToken(tokenPlain);
-  return await RefreshToken.findOne({ where: { tokenHash } });
+  const token_hash = hashToken(tokenPlain);
+  return await RefreshToken.findOne({ where: { token_hash } });
 };
 
 const revokeRefreshToken = async (tokenRecord, replacedByHash = null) => {
@@ -38,11 +38,36 @@ const revokeRefreshToken = async (tokenRecord, replacedByHash = null) => {
   await tokenRecord.save();
 };
 
+// Nueva función: Revocar todos los refresh tokens de un usuario
+const revokeAllUserRefreshTokens = async (userId) => {
+  return await RefreshToken.update(
+    { revoked: true },
+    { 
+      where: { 
+        user_id: userId,
+        revoked: false // Solo revocar los que no están ya revocados
+      } 
+    }
+  );
+};
+
+// Nueva función: Obtener refresh token por userId (para logout)
+const findRefreshTokenByUserId = async (userId) => {
+  return await RefreshToken.findAll({ 
+    where: { 
+      user_id: userId,
+      revoked: false 
+    } 
+  });
+};
+
 module.exports = {
   signAccessToken,
   signRefreshToken,
   hashToken,
   saveRefreshToken,
   findRefreshTokenByPlain,
-  revokeRefreshToken
+  revokeRefreshToken,
+  revokeAllUserRefreshTokens,
+  findRefreshTokenByUserId
 };

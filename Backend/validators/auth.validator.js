@@ -27,6 +27,8 @@ const changePasswordValidation = [
     .withMessage('La nueva contraseña debe contener al menos: 1 mayúscula, 1 minúscula y 1 número'),
   
   body('confirmPassword')
+    .notEmpty()
+    .withMessage('Se requiere confirmar la nueva contraseña')
     .custom((value, { req }) => {
       if (value !== req.body.newPassword) {
         throw new Error('Las contraseñas no coinciden');

@@ -1,8 +1,17 @@
 // services/auth.service.js
 const jwt = require('jsonwebtoken');
 const { User, RefreshToken } = require('../models');
-const { signAccessToken, signRefreshToken, saveRefreshToken, findRefreshTokenByPlain, revokeRefreshToken, hashToken } = require('../utils/tokens.utils');
-const AppError = require('../utils/appError.utils'); // or your error class
+const { 
+  signAccessToken, 
+  signRefreshToken, 
+  saveRefreshToken, 
+  findRefreshTokenByPlain, 
+  revokeRefreshToken, 
+  hashToken,
+  revokeAllUserRefreshTokens,
+  findRefreshTokenByUserId
+} = require('../utils/tokens.utils');
+const AppError = require('../utils/appError.utils');
 
 class AuthService {
   async login(username, password) {
@@ -14,10 +23,18 @@ class AuthService {
       }
     }); 
 
-    if (!user) throw new AppError('Credenciales inválidas', 401);
+    if (!user) throw new AppError('Error en el usuario indicado', 401);
 
     const isValid = await user.validatePassword(password);
-    if (!isValid) throw new AppError('Credenciales inválidas', 401);
+    if (!isValid) throw new AppError('Contraseña incorrecta', 401);
+
+    // 🔥 NUEVO: Revocar todos los refresh tokens existentes del usuario antes de crear uno nuevo
+    try {
+      await revokeAllUserRefreshTokens(user.id);
+    } catch (err) {
+      console.error('Error revocando tokens existentes:', err);
+      // Continuar aunque falle la revocación de tokens anteriores
+    }
 
     // payload minimal
     const payload = { userId: user.id, role: user.role };
@@ -32,8 +49,6 @@ class AuthService {
     } catch (err) {
       throw new AppError(`Error al generar tokens- (${err.message})`, 500);
     }
-    
-    // Persist hashed refresh token for revocation & rotation
     
     const { password: _, ...userSafe } = user.toJSON();
     return { user: userSafe, accessToken, refreshToken }
@@ -76,23 +91,36 @@ class AuthService {
     }
   }
 
-  async logout(refreshTokenPlain) {
-    if (!refreshTokenPlain) return;
-    const tokenRecord = await findRefreshTokenByPlain(refreshTokenPlain);
-    if (tokenRecord && !tokenRecord.revoked) await revokeRefreshToken(tokenRecord);
-    // controllers will clear cookie
+  async logout(refreshTokenPlain = null, userId=null) {
+    try {
+      if (refreshTokenPlain) {
+        // Opción 1: Logout con refresh token específico
+        const tokenRecord = await findRefreshTokenByPlain(refreshTokenPlain);
+        if (tokenRecord && !tokenRecord.revoked) {
+          // Revocar todos los tokens del usuario (no solo el token específico)
+          await revokeAllUserRefreshTokens(tokenRecord.user_id);
+        }
+      } else if (userId) {
+        // Opción 2: Logout solo con userId (útil para logout forzado desde otros endpoints)
+        await revokeAllUserRefreshTokens(userId);
+      }
+    } catch (err) {
+      if (!user) throw new AppError('No fue posible cerrar sesión', 500);
+      // No lanzar error en logout, solo registrar
+    }
   }
 
-  async changePassword(userId, currentPassword, newPassword) {
-    const user = await User.findByPk(userId);
+  async changePassword(id, currentPassword, newPassword) {
+    const user = await User.findByPk(id);
     if (!user) throw new AppError('Usuario no encontrado', 404);
 
     const match = await user.validatePassword(currentPassword);
     if (!match) throw new AppError('Contraseña actual incorrecta', 401);
 
     await user.update({ password: newPassword });
-    // Optionally revoke all refresh tokens for this user after password change:
-    await RefreshToken.update({ revoked: true }, { where: { userId } });
+    
+    // 🔥 MEJORADO: Usar la nueva función para revocar todos los refresh tokens
+    await revokeAllUserRefreshTokens(id);
 
     return { message: 'Contraseña actualizada correctamente' };
   }
@@ -104,6 +132,15 @@ class AuthService {
     });
     if (!user) throw new AppError('Usuario no encontrado', 404);
     return user;
+  }
+
+  // 🔥 NUEVO: Método para logout forzado (útil para administradores)
+  async forceLogout(userId) {
+    const user = await User.findByPk(userId);
+    if (!user) throw new AppError('Usuario no encontrado', 404);
+
+    await revokeAllUserRefreshTokens(userId);
+    return { message: 'Sesiones del usuario cerradas exitosamente' };
   }
 }
 

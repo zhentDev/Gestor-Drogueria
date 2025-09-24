@@ -10,6 +10,12 @@ class UserController {
     const result = await userService.getAllUsers(page, limit, search);
     res.json({ success: true, data: result });
   });
+  
+  getByUsername = catchAsync(async (req, res) => {
+    const { username } = req.params;
+    const user = await userService.getUserByUsername(username);
+    res.json({success: true,data: user});
+  });
 
   getById = catchAsync(async (req, res) => {
     const { id } = req.params;

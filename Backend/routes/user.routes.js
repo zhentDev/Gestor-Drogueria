@@ -9,6 +9,7 @@ const { createUserValidation, updateUserValidation } = require('../validators/us
 router.use(authenticateToken, requireAdmin);
 
 router.get('/', userController.getAll);
+router.get('/username/:username', userController.getByUsername);
 router.get('/:id', userController.getById);
 router.post('/', createUserValidation, userController.create);
 router.put('/:id', updateUserValidation, userController.update);

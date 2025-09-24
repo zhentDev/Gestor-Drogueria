@@ -73,14 +73,10 @@ class AuthController {
   logout = catchAsync(async (req, res) => {
     // Solo recibimos el refreshToken en el body
     const { refreshToken } = req.body;
-  
-    if (!refreshToken) {
-      // Manejo con AppError si quieres
-      throw AppError.badRequest('Refresh token requerido');
-    }
+
   
     // Invalida el refreshToken en la base de datos
-    await authService.logout(refreshToken);
+    await authService.logout(refreshToken,req.user.id);
   
     // Respondemos
     res.json({
