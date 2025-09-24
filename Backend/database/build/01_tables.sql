@@ -218,3 +218,15 @@ CREATE TABLE settings (
     description TEXT,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+--Tabla de tokens
+CREATE TABLE refresh_tokens (
+    id TEXT PRIMARY KEY,                -- guardas UUID como texto
+    token_hash TEXT NOT NULL,
+    user_id INTEGER NOT NULL,
+    expires_at DATETIME NOT NULL,
+    revoked INTEGER DEFAULT 0,          -- BOOLEAN se maneja como 0/1
+    replaced_by_token_hash TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);

@@ -20,6 +20,8 @@ const PurchaseDef = require('./purchase.model');
 const PurchaseDetailDef = require('./purchase_detail.model');
 const SaleDef = require('./sale.model');
 const SaleDetailDef = require('./sale_detail.model');
+const RefreshTokenDef = require('./refresh_token.model');
+
 
 // ------------------------------
 // Inicializa modelos (soporta ambos estilos de export)
@@ -38,7 +40,8 @@ const modelDefs = {
   Purchase: PurchaseDef,
   PurchaseDetail: PurchaseDetailDef,
   Sale: SaleDef,
-  SaleDetail: SaleDetailDef
+  SaleDetail: SaleDetailDef,
+  RefreshToken: RefreshTokenDef
 };
 
 const models = {};
@@ -137,6 +140,13 @@ if (M.User && M.CashMovement) {
   M.CashMovement.belongsTo(M.User, { foreignKey: 'user_id' });
 }
 
+// Usuario ↔ RefreshTokens (sesiones/refresh tokens)
+if (M.User && M.RefreshToken) {
+  M.User.hasMany(M.RefreshToken, { foreignKey: 'user_id' });
+  M.RefreshToken.belongsTo(M.User, { foreignKey: 'user_id' });
+}
+
+
 // Venta ↔ Movimientos de Caja (si registras movimientos por venta)
 if (M.Sale && M.CashMovement) {
   M.Sale.hasMany(M.CashMovement, { foreignKey: 'sale_id' });
@@ -184,6 +194,7 @@ if (M.Purchase && M.PurchaseDetail) {
   M.Purchase.hasMany(M.PurchaseDetail, { foreignKey: 'purchase_id', onDelete: 'CASCADE' });
   M.PurchaseDetail.belongsTo(M.Purchase, { foreignKey: 'purchase_id' });
 }
+
 
 // ------------------------------
 // Exporta sequelize + modelos

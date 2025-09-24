@@ -1,7 +1,7 @@
 // services/devService.js
 const { sequelize } = require('../models'); // tu models/index exporta la instancia
 const { QueryTypes } = require('sequelize');
-
+const AppError = require('../utils/appError.utils');
 // Importar modelos directamente
 const { Sale, SaleDetail, Purchase, PurchaseDetail } = require('../models');
 
@@ -106,7 +106,7 @@ VALUES
 --------------------------------------------------------------------------------
 -- CASH_REGISTER (una sola, correspondiente al usuario cajero1 / día actual)
 --------------------------------------------------------------------------------
-INSERT INTO cash_registers (user_id, opening_date, initial_balance, status, notes)
+INSERT INTO cash_registers (user_id, opening_date, initial_amount, status, notes)
 SELECT u.id, datetime('now','localtime'), 100000.00, 'abierta', 'Apertura automática dev'
 FROM users u
 WHERE u.username = 'cajero1'
@@ -133,8 +133,7 @@ COMMIT;
 `;
 
 const RESET_SQL = `
-PRAGMA foreign_keys = ON;
-
+PRAGMA foreign_keys = OFF;
 BEGIN TRANSACTION;
 
 -- Borrar registros en el orden correcto (por claves foráneas)
@@ -145,20 +144,17 @@ DELETE FROM sales;
 DELETE FROM purchase_details;
 DELETE FROM purchases;
 DELETE FROM cash_registers;
+DELETE FROM audit_logs;
+DELETE FROM refresh_tokens;
 DELETE FROM customers;
 DELETE FROM products;
 DELETE FROM suppliers;
 DELETE FROM categories;
 DELETE FROM users;
 
--- Opcional: limpiar logs y configuración de prueba
-DELETE FROM audit_logs;
+-- Opcional: limpiar settings y secuencias
 DELETE FROM settings;
-
--- Reiniciar contadores AUTOINCREMENT
 DELETE FROM sqlite_sequence;
-
-COMMIT;
 `;
 
 /* -------------------------
@@ -183,13 +179,26 @@ module.exports = {
     if (process.env.NODE_ENV !== 'development') {
       throw new Error('resetDb only allowed in development');
     }
+    const tables = await sequelize.query(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';",
+      { type: sequelize.QueryTypes.SELECT }
+    );
+    
+    // Para cada tabla, ver su foreign_key_list
+    for (const t of tables) {
+      const fks = await sequelize.query(`PRAGMA foreign_key_list(${t.name});`, { type: sequelize.QueryTypes.SELECT });
+      if (fks && fks.length) {
+        console.log('Table', t.name, 'fks:', fks);
+      }
+    }
+    await sequelize.query('PRAGMA foreign_keys = OFF;');
     const t = await sequelize.transaction();
     try {
       await execMultiSql(RESET_SQL, { transaction: t });
       await t.commit();
     } catch (err) {
       await t.rollback();
-      throw err;
+      throw AppError.internal('Unknown error resetting database', { original: err.message });
     }
   },
 

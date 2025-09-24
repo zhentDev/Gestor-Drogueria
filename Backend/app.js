@@ -35,10 +35,11 @@ if (process.env.NODE_ENV === 'development') {
   app.use('/__dev', devRouter);
 }
 
+app.use('/api/auth', require('./routes/auth.routes'));//app.use('/api/users', require('./routes/users.routes'));
+app.use('/api/users', require('./routes/user.routes'));
 
 // Routes
-/* app.use('/api/auth', require('./routes/auth.routes'));
-app.use('/api/users', require('./routes/users.routes'));
+/* 
 app.use('/api/products', require('./routes/products.routes')); 
 app.use('/api/purchases', require('./routes/purchases.routes'));
 app.use('/api/sales', require('./routes/sales.routes'));
