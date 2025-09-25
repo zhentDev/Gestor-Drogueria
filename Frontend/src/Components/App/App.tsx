@@ -1,10 +1,16 @@
 import './App.css'
 import NavBar from '../NavBar'
-import Compras from '../Compra'
 import Login from '../Login/Login'
 import { Route, Routes, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { ProtectedRoute } from '../ProtectedRoute'
+import Compras from '../Pages/Compras'
+import Ventas from '../Pages/Ventas'
+import GestionCajas from '../Pages/GestionCajas'
+import GestionDeCaja from '../Pages/SubPages/GestionDeCaja'
+import SalidasDeCaja from '../Pages/SubPages/SalidasDeCaja'
+import Inventarios from '../Pages/Inventarios'
+import GestionDeProductos from '../Pages/SubPages/GestionDeProductos'
 
 export interface User {
   id: number | null;
@@ -44,7 +50,7 @@ function App() {
 
   return (
 
-    <div className="overflow-x-hidden flex flex-col h-screen gap-3 justify-between items-center">
+    <div className="overflow-x-hidden flex flex-col h-screen gap-3 justify-between items-center select-none">
 
       {
         user.name ? (
@@ -61,9 +67,14 @@ function App() {
         <Route path='/login' element={<Login />}></Route>
         <Route element={<ProtectedRoute isAllowed={!!user.name} />}>
           <Route path='/viewPedidos' element={<Compras />}></Route>
-          <Route path='/viewFacturacionHor' element={<></>}></Route>
-          <Route path='/menuCajas' element={<></>}></Route>
-          <Route path='/viewInventarios' element={<></>}></Route>
+          <Route path='/viewFacturacionHor' element={<Ventas />}></Route>
+          <Route path='/menuCajas' element={<GestionCajas />}></Route>
+          <Route path='/viewGestionCajas' element={<GestionDeCaja />}></Route>
+          <Route path='/viewGastos' element={<SalidasDeCaja />}></Route>
+          <Route path='/viewInventarios' element={<Inventarios />}></Route>
+          <Route path='/maestraProd' element={<GestionDeProductos />}></Route>
+          <Route path='/viewinfoinventario' element={<></>}></Route>
+          <Route path='/masivoPreciosVenta' element={<></>}></Route>
         </Route>
         <Route path='/viewListFactura' element={
           <ProtectedRoute isAllowed={!!user.name && user.permissions?.includes("admin") ? true : false} redirectTo="/">
