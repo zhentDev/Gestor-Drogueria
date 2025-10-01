@@ -44,8 +44,8 @@ function App() {
         },
         // ¡IMPORTANTE! Usa el usuario y contraseña que configuraste en tu backend.
         body: JSON.stringify({
-          username: "admin",
-          password: "admin123", // Reemplaza con tu contraseña real
+          username: "maicoldf",
+          password: "Mdfd0206", // Reemplaza con tu contraseña real
         }),
       });
 

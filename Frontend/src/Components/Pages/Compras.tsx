@@ -1,8 +1,19 @@
 import MainBanner from "../MainBanner";
 import ProductTable from "../ProductTable";
 import Search from "../Search";
+import CreateProvider from "../Pages/Modals/CreateProvider";
+import { useState } from "react";
 
 function Compras() {
+  const [isModalOpenDetails, setIsModalOpenDetails] = useState(false);
+
+  const handleOpenModalDetails = () => {
+    setIsModalOpenDetails(true);
+  };
+  const handleCloseModalDetails = () => {
+    setIsModalOpenDetails(false);
+  };
+
   return (
     <div className="h-full w-10/12 flex flex-col justify-center items-center mx-auto">
       <MainBanner />
@@ -17,12 +28,19 @@ function Compras() {
             </span>
           </div>
           <div className="flex gap-5 justify-around mx-5 w-full max-w-max">
-            <button className="bg-slate-300 border-indigo-800 rounded-xl px-4 py-1 text-center h-auto w-auto align-middle shadow-md shadow-emerald-600 border-opacity-60 border-2 hover:border-opacity-0 hover:brightness-90 font-semibold">
+            <button
+              onClick={handleOpenModalDetails}
+              className="bg-slate-300 border-indigo-800 rounded-xl px-4 py-1 text-center h-auto w-auto align-middle shadow-md shadow-emerald-600 border-opacity-60 border-2 hover:border-opacity-0 hover:brightness-90 font-semibold"
+            >
               Crear Proveedor
             </button>
             <button className="bg-slate-300 border-indigo-800 rounded-xl px-4 py-1 text-center h-auto w-auto align-middle shadow-md shadow-emerald-600 border-opacity-60 border-2 hover:border-opacity-0 hover:brightness-90 font-semibold">
               Crear Producto
             </button>
+            <CreateProvider
+              isOpen={isModalOpenDetails}
+              onClose={handleCloseModalDetails}
+            />
             <button className="bg-secondary border-indigo-800 rounded-xl px-4 py-1 text-center h-auto w-auto align-middle shadow-md shadow-emerald-600 border-opacity-30 border-2 hover:border-opacity-0 hover:brightness-110 font-semibold">
               Eliminar compra Actual
             </button>
