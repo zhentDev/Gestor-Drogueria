@@ -1,4 +1,6 @@
-// models/sale_detail.model.js
+// =============================================
+// models/sale_detail.model.js (ACTUALIZADO)
+// =============================================
 module.exports = (sequelize, DataTypes) => {
   const SaleDetail = sequelize.define('SaleDetail', {
     id: {
@@ -13,6 +15,14 @@ module.exports = (sequelize, DataTypes) => {
     product_id: {
       type: DataTypes.INTEGER,
       allowNull: false
+    },
+    product_presentation_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    batch_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     },
     quantity: {
       type: DataTypes.INTEGER,
@@ -32,9 +42,9 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     tableName: 'sale_details',
-    timestamps: false
+    timestamps: false,
+    underscored: true
   });
-
 
   return SaleDetail;
 };

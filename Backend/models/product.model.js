@@ -1,4 +1,6 @@
+// =============================================
 // models/product.model.js
+// =============================================
 module.exports = (sequelize, DataTypes) => {
   const Product = sequelize.define('Product', {
     id: {
@@ -6,14 +8,16 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
-    code: {
+    barcode: {
       type: DataTypes.STRING(50),
       unique: true,
-      allowNull: false
+      allowNull: false,
+      field: 'barcode'
     },
     name: {
-      type: DataTypes.STRING(200),
-      allowNull: false
+      type: DataTypes.STRING(300),
+      allowNull: false,
+      field: 'name'
     },
     description: {
       type: DataTypes.TEXT,
@@ -23,31 +27,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: true
     },
-    unit: {
-      type: DataTypes.STRING(20),
-      defaultValue: 'unidad'
-    },
-    purchase_price: {
-      type: DataTypes.DECIMAL(10, 2),
-      defaultValue: 0
-    },
-    sale_price: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false
-    },
-    min_stock: {
+    manufacturer_id: {
       type: DataTypes.INTEGER,
-      defaultValue: 10
+      allowNull: true
     },
-    current_stock: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0
-    },
-    max_stock: {
-      type: DataTypes.INTEGER,
-      defaultValue: 1000
-    },
-    location: {
+    invima_registry: {
       type: DataTypes.STRING(50),
       allowNull: true
     },
@@ -55,8 +39,8 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     },
-    expiration_date: {
-      type: DataTypes.DATE,
+    location: {
+      type: DataTypes.STRING(100),
       allowNull: true
     },
     is_active: {
@@ -65,15 +49,18 @@ module.exports = (sequelize, DataTypes) => {
     },
     created_at: {
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW
+      defaultValue: DataTypes.NOW,
+      field: 'created_at'
     },
     updated_at: {
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW
+      defaultValue: DataTypes.NOW,
+      field: 'updated_at'
     }
   }, {
     tableName: 'products',
-    timestamps: false // porque ya defines created_at y updated_at manualmente
+    timestamps: false,
+    underscored: true
   });
 
   return Product;

@@ -1,4 +1,6 @@
-// models/purchase_detail.model.js
+// =============================================
+// models/purchase_detail.model.js (ACTUALIZADO)
+// =============================================
 module.exports = (sequelize, DataTypes) => {
   const PurchaseDetail = sequelize.define('PurchaseDetail', {
     id: {
@@ -14,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
+    batch_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     quantity: {
       type: DataTypes.INTEGER,
       allowNull: false
@@ -26,20 +32,19 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false
     },
-    expiry_date: {  // 👈 mantener igual que en la tabla
-      type: DataTypes.DATE,
+    expiry_date: {
+      type: DataTypes.DATEONLY,
       allowNull: true
     },
-    batch_number: { // 👈 faltaba en el modelo
+    batch_number: {
       type: DataTypes.STRING(50),
       allowNull: true
     }
   }, {
     tableName: 'purchase_details',
-    timestamps: false
+    timestamps: false,
+    underscored: true
   });
-
-
 
   return PurchaseDetail;
 };
