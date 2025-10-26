@@ -1,4 +1,6 @@
--- Trigger: Crear lote y actualizar inventario después de una compra
+-- =============================================
+-- 1. TRIGGER: Crear lote y actualizar inventario después de una compra
+-- =============================================
 DROP TRIGGER IF EXISTS after_purchase_detail_insert;
 
 CREATE TRIGGER after_purchase_detail_insert
@@ -28,7 +30,7 @@ BEGIN
         CURRENT_TIMESTAMP
     )
     ON CONFLICT(product_id, batch_number) DO UPDATE SET
-        quantity = quantity + NEW.quantity,
+        quantity = quantity + excluded.quantity,
         updated_at = CURRENT_TIMESTAMP;
     
     -- Registrar movimiento de inventario
@@ -59,10 +61,10 @@ BEGIN
         NEW.unit_price,
         pu.user_id,
         CURRENT_TIMESTAMP
-    FROM product_batches pb, purchases pu
+    FROM product_batches pb
+    INNER JOIN purchases pu ON pu.id = NEW.purchase_id
     WHERE pb.product_id = NEW.product_id 
-        AND pb.batch_number = COALESCE(NEW.batch_number, 'LOTE-' || NEW.purchase_id || '-' || NEW.product_id)
-        AND pu.id = NEW.purchase_id;
+        AND pb.batch_number = COALESCE(NEW.batch_number, 'LOTE-' || NEW.purchase_id || '-' || NEW.product_id);
     
     -- Actualizar el batch_id en purchase_details
     UPDATE purchase_details
@@ -75,28 +77,32 @@ BEGIN
     WHERE id = NEW.id AND batch_id IS NULL;
 END;
 
-#Trigger: Actualizar stock de lote después de una venta (FEFO - First Expired First Out)
-#=============================================
-#2. TRIGGER: Actualizar stock de lote después de una venta
-#=============================================
+-- =============================================
+-- 2. TRIGGER: Actualizar stock de lote después de una venta (FEFO)
+-- =============================================
 DROP TRIGGER IF EXISTS after_sale_detail_insert;
 
-CREATE TRIGGER after_sale_detail_insert
-AFTER INSERT ON sale_details
+DROP TRIGGER IF EXISTS after_sale_detail_insert;
+
+CREATE TRIGGER before_sale_detail_insert
+BEFORE INSERT ON sale_details
+FOR EACH ROW
 BEGIN
-    -- Actualizar cantidad del lote específico
-    -- SQLite no soporta UPDATE...FROM, usamos subquery
-    UPDATE product_batches
-    SET 
-        quantity = quantity - (
-            SELECT NEW.quantity * pp.units_per_presentation
-            FROM product_presentations pp
-            WHERE pp.id = NEW.product_presentation_id
-        ),
-        updated_at = CURRENT_TIMESTAMP
-    WHERE id = NEW.batch_id;
-    
-    -- Registrar movimiento de inventario
+    -- Validaciones: 1) batch existe  2) batch.product_id coincide con NEW.product_id
+    -- 3) hay stock suficiente (no permitir cantidad negativa)
+    SELECT CASE
+        WHEN (SELECT id FROM product_batches WHERE id = NEW.batch_id) IS NULL
+            THEN RAISE(ABORT, 'Batch no existe: id=' || NEW.batch_id)
+        WHEN (SELECT product_id FROM product_batches WHERE id = NEW.batch_id) != NEW.product_id
+            THEN RAISE(ABORT, 'Mismatch: el batch ' || NEW.batch_id || ' pertenece a otro product_id')
+        WHEN (SELECT pb.quantity - (NEW.quantity * pp.units_per_presentation)
+              FROM product_batches pb
+              JOIN product_presentations pp ON pp.id = NEW.product_presentation_id
+              WHERE pb.id = NEW.batch_id) < 0
+            THEN RAISE(ABORT, 'Stock insuficiente en el lote ' || NEW.batch_id)
+    END;
+
+    -- Registrar movimiento de inventario (usa el quantity actual como quantity_before)
     INSERT INTO inventory_movements (
         product_id,
         batch_id,
@@ -117,16 +123,28 @@ BEGIN
         'venta',
         NEW.sale_id,
         'sale',
-        pb.quantity + (NEW.quantity * pp.units_per_presentation),
-        NEW.quantity * pp.units_per_presentation,
         pb.quantity,
+        (NEW.quantity * pp.units_per_presentation),
+        pb.quantity - (NEW.quantity * pp.units_per_presentation),
         s.user_id,
         CURRENT_TIMESTAMP
-    FROM product_batches pb, sales s, product_presentations pp
-    WHERE pb.id = NEW.batch_id 
-        AND s.id = NEW.sale_id
-        AND pp.id = NEW.product_presentation_id;
+    FROM product_batches pb
+    JOIN product_presentations pp ON pp.id = NEW.product_presentation_id
+    JOIN sales s ON s.id = NEW.sale_id
+    WHERE pb.id = NEW.batch_id;
+
+    -- Actualizar la cantidad del lote
+    UPDATE product_batches
+    SET 
+        quantity = quantity - (
+            SELECT NEW.quantity * pp.units_per_presentation
+            FROM product_presentations pp
+            WHERE pp.id = NEW.product_presentation_id
+        ),
+        updated_at = CURRENT_TIMESTAMP
+    WHERE id = NEW.batch_id;
 END;
+
 
 -- =============================================
 -- 3. TRIGGER: Registrar cambios de precio
@@ -154,7 +172,7 @@ BEGIN
 END;
 
 -- =============================================
--- 4. TRIGGER: Prevenir ventas sin stock suficiente (CORREGIDO)
+-- 4. TRIGGER: Prevenir ventas sin stock suficiente
 -- =============================================
 DROP TRIGGER IF EXISTS before_sale_detail_insert;
 
