@@ -8,7 +8,7 @@ INSERT OR IGNORE INTO sales (id, invoice_number, customer_id, user_id, cash_regi
 
 -- Venta 2: Cliente compra 1 caja de DOLEX + 5 tabletas sueltas de IBUPROFENO
 INSERT INTO sale_details (id, sale_id, product_id, product_presentation_id, batch_id, quantity, unit_price, discount, subtotal) VALUES
-(3, 1, 9, 3, 2, 1, 12000, 500, 11500);
+(3, 1, 9, 3, 1, 1, 12000, 500, 11500);
 -- (2, 1, 3, 6, 3, 5, 900, 0, 4500);
 
 COMMIT;

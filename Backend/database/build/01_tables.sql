@@ -112,10 +112,10 @@ CREATE TABLE sale_details (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     sale_id INTEGER NOT NULL,
     product_id INTEGER NOT NULL,
-    product_presentation_id INTEGER NOT NULL, -- Qué presentación se vendió
-    batch_id INTEGER, -- De qué lote se tomó (para FIFO/FEFO)
-    quantity INTEGER NOT NULL, -- Cantidad de presentaciones vendidas
-    unit_price DECIMAL(10,2) NOT NULL, -- Precio por presentación
+    product_presentation_id INTEGER NOT NULL,
+    batch_id INTEGER,
+    quantity INTEGER NOT NULL,
+    unit_price DECIMAL(10,2) NOT NULL,
     discount DECIMAL(10,2) DEFAULT 0,
     subtotal DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE,
