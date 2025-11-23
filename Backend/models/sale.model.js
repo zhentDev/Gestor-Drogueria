@@ -1,4 +1,4 @@
-// models/sale.model.js
+// models/sale.model.js - CORREGIDO
 module.exports = (sequelize, DataTypes) => {
   const Sale = sequelize.define('Sale', {
     id: {
@@ -62,13 +62,17 @@ module.exports = (sequelize, DataTypes) => {
     notes: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    created_at: {  // ❌ FALTABA ESTE CAMPO
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+      field: 'created_at'
     }
   }, {
     tableName: 'sales',
-    timestamps: false
+    timestamps: false,
+    underscored: true  // ✅ Agregar esto para consistencia
   });
-
-
 
   return Sale;
 };
