@@ -1,3 +1,36 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* DianTableStyles.css */
+
+.custom-datatable {
+  border-collapse: collapse !important;
+}
+
+.custom-datatable th,
+.custom-datatable td {
+  border-right: 1px solid #e5e7eb; /* border-gray-200 */
+}
+
+.custom-datatable th:last-child,
+.custom-datatable td:last-child {
+  border-right: none;
+}
+
+/* Zebra stripes */
+.custom-datatable tbody tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+/* Efecto hover suave */
+.custom-datatable tbody tr:hover {
+  background-color: #fdf2f2; /* Un rojo muy tenue para indicar pendiente/error */
+}

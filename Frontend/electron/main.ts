@@ -1,5 +1,5 @@
 import { app, BrowserWindow } from 'electron'
-import { createRequire } from 'node:module'
+
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
@@ -10,7 +10,7 @@ import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-insta
 //   'AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\fmkadmapgofadopljbjfkapdkoienihi\\6.1.5_0'
 // )
 
-const require = createRequire(import.meta.url)
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // The built directory structure

@@ -1,28 +1,24 @@
 import { useState } from "react";
 import EditProduct from "../Views/EditProduct";
+import Traceability from "../Views/Traceability";
 import ProductDetails from "../Modals/ProductDetails";
 import ProductBalances from "../Modals/ProductBalances";
 import InventoryAdjustment from "../Modals/InventoryAdjustment";
 
+type ActiveView = "main" | "edit" | "traceability";
+
 function GestionDeProductos() {
   const [isModalOpenDetails, setIsModalOpenDetails] = useState(false);
-  const [isViewOpenEdit, setIsViewOpenEdit] = useState(false);
   const [isModalOpenBalances, setIsModalOpenBalances] = useState(false);
   const [isModalOpenInventoryAdjustment, setIsModalOpenInventoryAdjustment] =
     useState(false);
+  const [activeView, setActiveView] = useState<ActiveView>("main");
 
   const handleOpenModalDetails = () => {
     setIsModalOpenDetails(true);
   };
   const handleCloseModalDetails = () => {
     setIsModalOpenDetails(false);
-  };
-
-  const handleOpenModalEdit = () => {
-    setIsViewOpenEdit(true);
-  };
-  const handleCloseModalEdit = () => {
-    setIsViewOpenEdit(false);
   };
 
   const handleOpenModalBalances = () => {
@@ -39,9 +35,19 @@ function GestionDeProductos() {
     setIsModalOpenInventoryAdjustment(false);
   };
 
-  return isViewOpenEdit ? (
-    <EditProduct isOpen={isViewOpenEdit} onClose={handleCloseModalEdit} />
-  ) : (
+  const handleViewChange = (view: ActiveView) => {
+    setActiveView(view);
+  };
+
+  if (activeView === "edit") {
+    return <EditProduct onClose={() => handleViewChange("main")} />;
+  }
+
+  if (activeView === "traceability") {
+    return <Traceability onClose={() => handleViewChange("main")} />;
+  }
+
+  return (
     <div className="flex flex-wrap w-full justify-start items-start flex-col h-full gap-5">
       <div className="w-screen h-fit m-5 p-3 border-2 border-rose-500 rounded-lg flex justify-center flex-wrap shadow-md shadow-slate-400 drop-shadow-xl">
         <div className="h-10 items-center flex justify-start w-full">
@@ -113,7 +119,7 @@ function GestionDeProductos() {
 
               <td className="">
                 <button
-                  onClick={handleOpenModalEdit}
+                  onClick={() => handleViewChange("edit")}
                   className="flex flex-col items-center mx-4 bg-amber-400 my-3 border-indigo-800 rounded-xl px-4 py-1 text-center h-auto w-auto align-middle shadow-md shadow-emerald-600 border-opacity-60 border-2 hover:border-opacity-0 hover:brightness-90 font-semibold"
                 >
                   <i>2</i>Editar
@@ -153,7 +159,10 @@ function GestionDeProductos() {
               />
 
               <td className="">
-                <button className="flex flex-col items-center mx-4 bg-indigo-500 text-stone-200 my-3 border-indigo-800 rounded-xl px-4 py-1 text-center h-auto w-auto align-middle shadow-md shadow-emerald-600 border-opacity-60 border-2 hover:border-opacity-0 hover:brightness-90 font-semibold">
+                <button
+                  onClick={() => handleViewChange("traceability")}
+                  className="flex flex-col items-center mx-4 bg-indigo-500 text-stone-200 my-3 border-indigo-800 rounded-xl px-4 py-1 text-center h-auto w-auto align-middle shadow-md shadow-emerald-600 border-opacity-60 border-2 hover:border-opacity-0 hover:brightness-90 font-semibold"
+                >
                   <i>2</i>Trazabilidad
                 </button>
               </td>

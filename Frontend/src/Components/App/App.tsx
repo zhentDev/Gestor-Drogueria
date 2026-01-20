@@ -11,10 +11,19 @@ import GestionDeCaja from "../Pages/SubPages/GestionDeCaja";
 import SalidasDeCaja from "../Pages/SubPages/SalidasDeCaja";
 import Inventarios from "../Pages/Inventarios";
 import GestionDeProductos from "../Pages/SubPages/GestionDeProductos";
+import InformacionInventario from "../Pages/SubPages/InformacionInventario";
+import ActualizarPreciosVenta from "../Pages/SubPages/ActualizarPreciosVenta";
+import Facturas from "../Pages/Facturas";
+import Configuracion from "../Pages/Configuracion";
+import ClientesProveedores from "../Pages/SubPages/Configuracion/ClientesProveedores";
+import EmpleadosPermisos from "../Pages/SubPages/Configuracion/EmpleadosPermisos";
+import ConfiguracionCajas from "../Pages/SubPages/Configuracion/ConfiguracionCajas";
+import UbicacionProductos from "../Pages/SubPages/Configuracion/UbicacionProductos";
 
 export interface User {
   id: number | null;
   name: string | null;
+
   permissions: string[] | null;
   roles?: string[] | null;
 }
@@ -56,7 +65,7 @@ function App() {
         // Si la respuesta no es exitosa, muestra el error y no hagas nada.
         console.error(
           "Error de login:",
-          data.message || "Credenciales incorrectas"
+          data.message || "Credenciales incorrectas",
         );
         alert(`Error de login: ${data.message || "Credenciales incorrectas"}`);
         return;
@@ -78,7 +87,7 @@ function App() {
     } catch (error) {
       console.error("Fallo la conexión con el servidor:", error);
       alert(
-        "No se pudo conectar con el servidor. Revisa la consola para más detalles."
+        "No se pudo conectar con el servidor. Revisa la consola para más detalles.",
       );
     }
   };
@@ -117,37 +126,91 @@ function App() {
           <Route path="/viewGastos" element={<SalidasDeCaja />}></Route>
           <Route path="/viewInventarios" element={<Inventarios />}></Route>
           <Route path="/maestraProd" element={<GestionDeProductos />}></Route>
-          <Route path="/viewinfoinventario" element={<></>}></Route>
-          <Route path="/masivoPreciosVenta" element={<></>}></Route>
+          <Route
+            path="/viewinfoinventario"
+            element={<InformacionInventario />}
+          ></Route>
+          <Route
+            path="/masivoPreciosVenta"
+            element={<ActualizarPreciosVenta />}
+          ></Route>
         </Route>
         <Route
           path="/viewListFactura"
           element={
             <ProtectedRoute
-              isAllowed={
-                !!user.name && user.permissions?.includes("admin")
-                  ? true
-                  : false
-              }
+              // isAllowed={
+              //   !!user.name && user.permissions?.includes("admin")
+              //     ? true
+              //     : false
+              // }
               redirectTo="/"
+              isAllowed={!!user.name}
             >
-              <></>
+              <Facturas />
             </ProtectedRoute>
           }
         ></Route>
         <Route
-          path="/confView"
+          path="/menuConfiguracion"
           element={
             <ProtectedRoute
-              isAllowed={
-                !!user.name && user.roles?.includes("admin") ? true : false
-              }
+              // isAllowed={!!user.name && user.roles?.includes("admin")}
+              isAllowed={!!user.name}
               redirectTo="/"
             >
-              <></>
+              <Configuracion />
             </ProtectedRoute>
           }
-        ></Route>
+        />
+        <Route
+          path="/viewClientes"
+          element={
+            <ProtectedRoute
+              // isAllowed={!!user.name && user.roles?.includes("admin")}
+              isAllowed={!!user.name}
+              redirectTo="/"
+            >
+              <ClientesProveedores />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/viewPermisos"
+          element={
+            <ProtectedRoute
+              // isAllowed={!!user.name && user.roles?.includes("admin")}
+              isAllowed={!!user.name}
+              redirectTo="/"
+            >
+              <EmpleadosPermisos />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/viewConfiguracionCajas"
+          element={
+            <ProtectedRoute
+              // isAllowed={!!user.name && user.roles?.includes("admin")}
+              isAllowed={!!user.name}
+              redirectTo="/"
+            >
+              <ConfiguracionCajas />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/viewUbicaciones"
+          element={
+            <ProtectedRoute
+              // isAllowed={!!user.name && user.roles?.includes("admin")}
+              isAllowed={!!user.name}
+              redirectTo="/"
+            >
+              <UbicacionProductos />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </div>
   );
