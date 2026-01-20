@@ -27,7 +27,7 @@ function Compras() {
   return (
     <div className="h-full w-10/12 flex flex-col justify-center items-center mx-auto">
       <MainBanner />
-      <div className="h-5/6 w-full flex flex-col justify-between items-center p-0 m-0 shadow-md rounded-lg border border-gray-200 gap-2">
+      <div className="h-auto w-full flex flex-col justify-between items-center p-0 m-0 shadow-md rounded-lg border border-gray-200 gap-2">
         <section className="h-1/6 my-0 px-5 flex w-full items-center justify-between">
           <div className="flex gap-1 flex-col w-auto h-full justify-center">
             <span className="text-primary font-bold w-30 mr-1">
