@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   Search,
   Download,
@@ -12,16 +12,55 @@ import SalesTable from "./Tables/SalesTable";
 import PurchaseTable from "./Tables/PurchaseTable";
 import DianPendingTable from "./Tables/DianPendingTable";
 
+// --- INTERFACES ---
+interface Sale {
+  id: number;
+  fecha: string;
+  numero: string;
+  doc: string;
+  rSocial: string;
+  tipo: string;
+  total: number;
+  empleado: string;
+}
+
+interface Purchase {
+  id: string;
+  FECHA: string;
+  CONSECUTIVO: string;
+  DOCTERCERO: string;
+  NOMTERCERO: string;
+  TIPOTRANSACCION: string;
+  TOTAL: number;
+}
+
+interface DianPending {
+  id: string;
+  FECHA: string;
+  CONSECUTIVO: string;
+  DOCTERCERO: string;
+  NOMTERCERO: string;
+  TIPOTRANSACCION: string;
+  TOTAL: number;
+  ERROR_DETALLE: string;
+}
+
+interface DataSources {
+  Ventas: Sale[];
+  Compras: Purchase[];
+  "Pendientes DIAN": DianPending[];
+  [key: string]: any[]; // Allow indexing with string, though more specific typing would be ideal here
+}
 
 // --- Mock Data ---
-const mockSales = Array.from({ length: 1000 }, (_, i) => ({ id: i + 1, fecha: "2026-01-15 19:41:53", numero: `S-${9382 + i}`, doc: "222222222222", rSocial: "Consumidor Final", tipo: "TIRILLA DE VENTA", total: 11700 + (i * 100), empleado: "tatiana amaris" }));
-const mockPurchases = Array.from({ length: 500 }, (_, i) => ({ id: `p-${i}`, FECHA: "2026-01-14 10:00:00", CONSECUTIVO: `C-${101 + i}`, DOCTERCERO: "900123456-7", NOMTERCERO: "DISTRIBUIDORA FARMACÉUTICA S.A.S", TIPOTRANSACCION: "FACTURA DE COMPRA", TOTAL: 750000 + (i * 1000) }));
-const mockDian = [
+const mockSales: Sale[] = Array.from({ length: 1000 }, (_, i) => ({ id: i + 1, fecha: "2026-01-15 19:41:53", numero: `S-${9382 + i}`, doc: "222222222222", rSocial: "Consumidor Final", tipo: "TIRILLA DE VENTA", total: 11700 + (i * 100), empleado: "tatiana amaris" }));
+const mockPurchases: Purchase[] = Array.from({ length: 500 }, (_, i) => ({ id: `p-${i}`, FECHA: "2026-01-14 10:00:00", CONSECUTIVO: `C-${101 + i}`, DOCTERCERO: "900123456-7", NOMTERCERO: "DISTRIBUIDORA FARMACÉUTICA S.A.S", TIPOTRANSACCION: "FACTURA DE COMPRA", TOTAL: 750000 + (i * 1000) }));
+const mockDian: DianPending[] = [
   { id: 'dian-1', FECHA: '2026-01-15', CONSECUTIVO: 'FVE-201', DOCTERCERO: '123456789', NOMTERCERO: 'Cliente Varios', TIPOTRANSACCION: 'FACTURA ELECTRÓNICA', TOTAL: 58000, ERROR_DETALLE: 'Error de validación: El NIT del receptor no es válido.' },
   { id: 'dian-2', FECHA: '2026-01-14', CONSECUTIVO: 'FVE-198', DOCTERCERO: '987654321', NOMTERCERO: 'Empresa Ejemplo S.A.', TIPOTRANSACCION: 'FACTURA ELECTRÓNICA', TOTAL: 120500, ERROR_DETALLE: 'Rechazado por la DIAN: El CUFE ya existe para otro documento.' },
 ];
 
-const dataSources = {
+const dataSources: DataSources = {
   "Ventas": mockSales,
   "Compras": mockPurchases,
   "Pendientes DIAN": mockDian,
@@ -29,11 +68,11 @@ const dataSources = {
 
 
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState("Ventas");
+  const [activeTab, setActiveTab] = useState<string>("Ventas");
   
   // --- Lógica de Paginación Centralizada ---
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
   // Memoizar cálculos para optimizar el rendimiento
   const { currentData, totalRecords, totalPages } = useMemo(() => {
@@ -49,13 +88,13 @@ const Dashboard = () => {
   const firstRecordOnPage = totalRecords > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0;
   const lastRecordOnPage = Math.min(currentPage * itemsPerPage, totalRecords);
 
-  const handlePageChange = (pageNumber) => {
+  const handlePageChange = (pageNumber: number) => {
     if (pageNumber >= 1 && pageNumber <= totalPages) {
       setCurrentPage(pageNumber);
     }
   };
   
-  const handleTabClick = (tab) => {
+  const handleTabClick = (tab: string) => {
     setActiveTab(tab);
     setCurrentPage(1); // Resetear a la primera página al cambiar de pestaña
   };

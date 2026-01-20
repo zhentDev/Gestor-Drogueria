@@ -6,12 +6,30 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "../../Icons";
-import { inventoryData } from "../../../Data/inventarioData";
+import { inventoryData as originalInventoryData } from "../../../Data/inventarioData";
+
+// --- INTERFACES ---
+interface InventoryItem {
+  id: string;
+  name: string;
+  manufacturer: string;
+  category: string;
+  quantity: number;
+  unitCost: number;
+  lastPurchasePrice: number | string;
+  // Add other properties if they exist in your inventoryData
+  [key: string]: any; // Index signature to allow dynamic access
+}
+
+interface SortConfig {
+  key: string;
+  direction: "ascending" | "descending";
+}
 
 // --- Componente principal ---
 export default function InformacionInventario() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortConfig, setSortConfig] = useState({
+  const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: "name",
     direction: "ascending",
   });
@@ -19,15 +37,15 @@ export default function InformacionInventario() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const totalInventoryValue = useMemo(() => {
-    return inventoryData.reduce(
+    return originalInventoryData.reduce(
       (acc, item) => acc + item.quantity * item.unitCost,
       0
     );
-  }, [inventoryData]);
+  }, [originalInventoryData]);
 
   // Lógica para filtrar, ordenar y paginar los datos
   const processedData = useMemo(() => {
-    let sortableItems = [...inventoryData];
+    let sortableItems: InventoryItem[] = [...originalInventoryData];
 
     // Filtrado por búsqueda
     if (searchTerm) {
@@ -40,7 +58,7 @@ export default function InformacionInventario() {
     }
 
     // Ordenamiento
-    sortableItems.sort((a, b) => {
+    sortableItems.sort((a: InventoryItem, b: InventoryItem) => {
       if (a[sortConfig.key] < b[sortConfig.key]) {
         return sortConfig.direction === "ascending" ? -1 : 1;
       }
@@ -51,7 +69,7 @@ export default function InformacionInventario() {
     });
 
     return sortableItems;
-  }, [searchTerm, sortConfig]);
+  }, [searchTerm, sortConfig, originalInventoryData]);
 
   // Paginación
   const totalPages = Math.ceil(processedData.length / itemsPerPage);
@@ -60,15 +78,15 @@ export default function InformacionInventario() {
     currentPage * itemsPerPage
   );
 
-  const requestSort = (key) => {
-    let direction = "ascending";
+  const requestSort = (key: string) => {
+    let direction: "ascending" | "descending" = "ascending";
     if (sortConfig.key === key && sortConfig.direction === "ascending") {
       direction = "descending";
     }
     setSortConfig({ key, direction });
   };
 
-  const formatCurrency = (number) => {
+  const formatCurrency = (number: number) => {
     if (typeof number !== "number") return number;
     return new Intl.NumberFormat("es-CO", {
       style: "currency",

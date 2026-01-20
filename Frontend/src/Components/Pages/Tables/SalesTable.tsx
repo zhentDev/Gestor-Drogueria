@@ -1,7 +1,18 @@
-import React from "react";
 import { Printer, FileText, BarChart } from "lucide-react";
 
-const SalesTable = ({ data }) => {
+// --- INTERFACE (copied from Facturas.tsx for now) ---
+interface Sale {
+  id: number;
+  fecha: string;
+  numero: string;
+  doc: string;
+  rSocial: string;
+  tipo: string;
+  total: number;
+  empleado: string;
+}
+
+const SalesTable = ({ data }: { data: Sale[] }) => {
   return (
     <div className="overflow-x-auto overflow-y-hidden border rounded-lg">
       <table className="w-full text-left text-sm border-collapse">
@@ -20,7 +31,7 @@ const SalesTable = ({ data }) => {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {data.map((inv, index) => (
+          {data.map((inv: Sale, index: number) => (
             <tr key={`${inv.id}-${index}`} className="hover:bg-blue-50 transition-colors">
               <td className="p-3 font-mono text-xs">{inv.fecha}</td>
               <td className="p-3">{inv.numero}</td>

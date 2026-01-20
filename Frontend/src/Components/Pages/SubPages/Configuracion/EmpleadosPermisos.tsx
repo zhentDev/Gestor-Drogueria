@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   Plus,
   Edit,
-  Shield,
   PlayCircle,
   Save,
   ArrowLeft,
@@ -10,9 +9,6 @@ import {
   X,
   Download,
   Search,
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 
 // --- INTERFACES ---
@@ -183,7 +179,9 @@ const EmpleadosPermisos: React.FC = () => {
                           <td className="p-3 border-r">{user.telefono}</td>
                           <td className="p-3 border-r text-center">
                             <button
+                              type="button"
                               onClick={() => handleEdit(user)}
+                              title="Editar usuario"
                               className="p-1.5 bg-amber-500 text-white rounded hover:bg-amber-600 shadow-sm"
                             >
                               <Edit size={14} />
@@ -374,7 +372,11 @@ const EmpleadosPermisos: React.FC = () => {
                             {rol.nombre}
                           </td>
                           <td className="p-4 text-center">
-                            <button className="p-1.5 bg-amber-500 text-white rounded hover:bg-amber-600 transition shadow-sm">
+                            <button
+                              type="button"
+                              title="Editar rol"
+                              className="p-1.5 bg-amber-500 text-white rounded hover:bg-amber-600 transition shadow-sm"
+                            >
                               <Edit size={14} />
                             </button>
                           </td>
@@ -407,7 +409,10 @@ const InputField = ({
       {label} {required && <span className="text-red-500">*</span>}
     </label>
     {type === "select" ? (
-      <select className="bg-transparent border-b-2 border-gray-300 focus:border-blue-600 outline-none py-1.5 text-sm font-semibold transition-all">
+      <select
+        aria-label={label}
+        className="bg-transparent border-b-2 border-gray-300 focus:border-blue-600 outline-none py-1.5 text-sm font-semibold transition-all"
+      >
         <option value="">Seleccione...</option>
         {options.map((opt: string) => (
           <option key={opt} value={opt}>
@@ -418,6 +423,7 @@ const InputField = ({
     ) : (
       <input
         type={type}
+        placeholder={label}
         defaultValue={value}
         disabled={disabled}
         className={`bg-transparent border-b-2 border-gray-300 focus:border-blue-600 outline-none py-1.5 text-sm font-semibold transition-all ${disabled ? "opacity-50 cursor-not-allowed italic" : ""}`}
@@ -435,6 +441,8 @@ const ToggleSwitch = ({ checked }: { checked: boolean }) => (
       <input
         type="checkbox"
         defaultChecked={checked}
+        title="Cambiar estado"
+        aria-label="Cambiar estado del empleado"
         className="sr-only peer"
       />
       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>

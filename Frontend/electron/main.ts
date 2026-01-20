@@ -41,8 +41,10 @@ function createWindow() {
       nodeIntegration: true,
       contextIsolation: true,
     },
-    fullscreen: true,
-  })
+fullscreen: false,
+  });
+
+  win.maximize();
 
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {

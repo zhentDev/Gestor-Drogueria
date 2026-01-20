@@ -85,7 +85,7 @@ function GestionDeCaja() {
             <span className="mt-3 text-2xl font-semibold">Ventas</span>
             <span className="mt-3">Mostrar MENU entradas</span>
             <span className="w-full text-end my-3">
-              Buscar: <input type="text" />
+              Buscar: <input type="text" placeholder="Buscar ventas..." />
             </span>
             <table className="w-11/12">
               <thead className="font-bold bg-slate-600 p-1 px-3 text-start text-slate-100">

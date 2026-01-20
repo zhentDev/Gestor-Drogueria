@@ -7,8 +7,6 @@ import {
   Download,
   Search,
   Users,
-  Truck,
-  Building,
 } from "lucide-react";
 
 // --- DEFINICIÓN DE TIPOS ---
@@ -376,7 +374,7 @@ const InputField = ({
       {label} {required && <span className="text-red-500">*</span>}
     </label>
     {type === "select" ? (
-      <select className="bg-transparent border-b-2 border-gray-300 focus:border-blue-600 outline-none py-1 text-sm transition font-medium">
+      <select aria-label={label} className="bg-transparent border-b-2 border-gray-300 focus:border-blue-600 outline-none py-1 text-sm transition font-medium">
         {options?.map((opt) => (
           <option key={opt} value={opt}>
             {opt}

@@ -35,32 +35,15 @@ const PlusIcon = () => (
   </svg>
 );
 
-const ArrowLeftIcon = () => (
-  <svg
-    className="w-4 h-4 mr-1 inline-block"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      d="M7 16l-4-4m0 0l4-4m-4 4h18"
-    ></path>
-  </svg>
-);
-
 export default function ActualizarPreciosVenta() {
   const [activeTab, setActiveTab] = useState("step1");
   const [selectedManufacturer, setSelectedManufacturer] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Obtener la fecha actual para mostrar en el encabezado
   const getFormattedDate = () => {
-    const options = {
+    const options: Intl.DateTimeFormatOptions = {
       weekday: "long",
       year: "numeric",
       month: "long",
@@ -78,8 +61,12 @@ export default function ActualizarPreciosVenta() {
     // Agrega más fabricantes si los tienes
   ];
 
-  const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setSelectedFile(event.target.files[0]);
+    } else {
+      setSelectedFile(null);
+    }
   };
 
   const handleUpload = () => {

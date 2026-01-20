@@ -1,9 +1,19 @@
-import React from "react";
 import { Printer, RefreshCw } from "lucide-react"; // Iconos modernos
 
-const PurchaseTable = ({ data }) => {
+// --- INTERFACE (copied from Facturas.tsx for now) ---
+interface Purchase {
+  id: string;
+  FECHA: string;
+  CONSECUTIVO: string;
+  DOCTERCERO: string;
+  NOMTERCERO: string;
+  TIPOTRANSACCION: string;
+  TOTAL: number;
+}
+
+const PurchaseTable = ({ data }: { data: Purchase[] }) => {
   // Función para formatear moneda
-  const formatCurrency = (value) => {
+  const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "COP",
@@ -27,7 +37,7 @@ const PurchaseTable = ({ data }) => {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {data.map((item, index) => (
+          {data.map((item: Purchase, index: number) => (
             <tr key={index} className="hover:bg-blue-50 transition-colors">
               <td className="p-3 font-mono text-xs text-gray-500">
                 {item.FECHA}

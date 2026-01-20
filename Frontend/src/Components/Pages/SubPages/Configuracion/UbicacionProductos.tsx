@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { MapPin, Edit2, Trash2, ChevronUp, Plus } from "lucide-react";
+import { MapPin, Edit2, Trash2, ChevronUp } from "lucide-react";
 import CreateLocationModal from "../../Modals/CreateLocationModal";
 
 // --- INTERFACES ---

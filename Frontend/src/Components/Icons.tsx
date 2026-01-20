@@ -1,4 +1,4 @@
-export const SortIcon = ({ direction }) => (
+export const SortIcon = ({ direction }: { direction: "ascending" | "descending" | null }) => (
   <svg
     className="w-3 h-3 ml-1.5"
     aria-hidden="true"
