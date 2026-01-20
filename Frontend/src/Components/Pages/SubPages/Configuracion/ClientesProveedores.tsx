@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {
-  PaperPlane,
+  Send,
   XCircle,
   Plus,
   FileEdit,
@@ -183,7 +183,7 @@ const ClientesProveedores: React.FC = () => {
                   type="button"
                   className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition shadow-md"
                 >
-                  <PaperPlane size={18} /> Enviar
+                  <Send size={18} /> Enviar
                 </button>
                 <button
                   type="button"

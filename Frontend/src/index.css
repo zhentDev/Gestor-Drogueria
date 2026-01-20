@@ -34,3 +34,26 @@ body,
 .custom-datatable tbody tr:hover {
   background-color: #fdf2f2; /* Un rojo muy tenue para indicar pendiente/error */
 }
+
+/* TableStyles.css */
+
+.custom-datatable {
+  border-collapse: collapse !important;
+}
+
+/* Bordes internos verticales */
+.custom-datatable th,
+.custom-datatable td {
+  border-right: 1px solid #e5e7eb; /* border-gray-200 */
+}
+
+/* Eliminar el último borde derecho para que se vea limpio */
+.custom-datatable th:last-child,
+.custom-datatable td:last-child {
+  border-right: none;
+}
+
+/* Animación sutil para las filas */
+.custom-datatable tbody tr {
+  transition: all 0.2s ease-in-out;
+}
