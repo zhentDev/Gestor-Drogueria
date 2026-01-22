@@ -44,52 +44,8 @@ function App() {
 
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // ¡IMPORTANTE! Usa el usuario y contraseña que configuraste en tu backend.
-        body: JSON.stringify({
-          username: "maicoldf",
-          password: "Mdfd0206", // Reemplaza con tu contraseña real
-        }),
-      });
-
-      const data = await response.json();
-      console.log("Respuesta del servidor:", data);
-
-      if (!response.ok || !data.success) {
-        // Si la respuesta no es exitosa, muestra el error y no hagas nada.
-        console.error(
-          "Error de login:",
-          data.message || "Credenciales incorrectas",
-        );
-        alert(`Error de login: ${data.message || "Credenciales incorrectas"}`);
-        return;
-      }
-
-      // La respuesta del backend debería tener un formato como { success: true, data: { user: {...}, token: '...' } }
-      const loggedInUser = data.data.user;
-
-      // Actualizamos el estado del usuario con los datos del backend
-      setUser({
-        id: loggedInUser.id,
-        name: loggedInUser.full_name, // Asumiendo que el nombre completo viene en 'full_name'
-        permissions: loggedInUser.permissions || [], // Asegúrate de que tu backend devuelva esto
-        roles: [loggedInUser.role], // Asumiendo que el rol viene en 'role'
-      });
-
-      // Opcional: guardar el token en localStorage para futuras peticiones
-      localStorage.setItem("authToken", data.data.token);
-    } catch (error) {
-      console.error("Fallo la conexión con el servidor:", error);
-      alert(
-        "No se pudo conectar con el servidor. Revisa la consola para más detalles.",
-      );
-    }
+  const handleLogin = () => {
+    navigate("/login"); // Redirigir a la página de login
   };
 
   const handleLogOut = () => {
@@ -117,8 +73,8 @@ function App() {
             </div>
           }
         ></Route>
-        <Route path="/login" element={<Login />}></Route>
-        <Route element={<ProtectedRoute isAllowed={!!user.name} />}>
+        <Route path="/login" element={<Login setUser={setUser} />}></Route>
+        <Route element={<ProtectedRoute isAllowed={!!user.name} redirectTo="/login" />}>
           <Route path="/viewPedidos" element={<Compras />}></Route>
           <Route path="/viewFacturacionHor" element={<Ventas />}></Route>
           <Route path="/menuCajas" element={<GestionCajas />}></Route>
@@ -134,87 +90,44 @@ function App() {
             path="/masivoPreciosVenta"
             element={<ActualizarPreciosVenta />}
           ></Route>
+          {/* Agrupando rutas de configuración bajo un solo ProotectedRoute */}
+          <Route
+            path="/menuConfiguracion"
+            element={<Configuracion />}
+          />
+          <Route
+            path="/viewClientes"
+            element={<ClientesProveedores />}
+          />
+          <Route
+            path="/viewPermisos"
+            element={<EmpleadosPermisos />}
+          />
+          <Route
+            path="/viewConfiguracionCajas"
+            element={<ConfiguracionCajas />}
+          />
+          <Route
+            path="/viewUbicaciones"
+            element={<UbicacionProductos />}
+          />
         </Route>
         <Route
           path="/viewListFactura"
           element={
             <ProtectedRoute
-              // isAllowed={
-              //   !!user.name && user.permissions?.includes("admin")
-              //     ? true
-              //     : false
-              // }
-              redirectTo="/"
+              redirectTo="/login"
               isAllowed={!!user.name}
             >
               <Facturas />
             </ProtectedRoute>
           }
         ></Route>
-        <Route
-          path="/menuConfiguracion"
-          element={
-            <ProtectedRoute
-              // isAllowed={!!user.name && user.roles?.includes("admin")}
-              isAllowed={!!user.name}
-              redirectTo="/"
-            >
-              <Configuracion />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/viewClientes"
-          element={
-            <ProtectedRoute
-              // isAllowed={!!user.name && user.roles?.includes("admin")}
-              isAllowed={!!user.name}
-              redirectTo="/"
-            >
-              <ClientesProveedores />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/viewPermisos"
-          element={
-            <ProtectedRoute
-              // isAllowed={!!user.name && user.roles?.includes("admin")}
-              isAllowed={!!user.name}
-              redirectTo="/"
-            >
-              <EmpleadosPermisos />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/viewConfiguracionCajas"
-          element={
-            <ProtectedRoute
-              // isAllowed={!!user.name && user.roles?.includes("admin")}
-              isAllowed={!!user.name}
-              redirectTo="/"
-            >
-              <ConfiguracionCajas />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/viewUbicaciones"
-          element={
-            <ProtectedRoute
-              // isAllowed={!!user.name && user.roles?.includes("admin")}
-              isAllowed={!!user.name}
-              redirectTo="/"
-            >
-              <UbicacionProductos />
-            </ProtectedRoute>
-          }
-        />
       </Routes>
     </div>
   );
 }
+
 
 function Navigation({ textButton, functionButton }: NavBarProps) {
   return <NavBar textButton={textButton} functionButton={functionButton} />;

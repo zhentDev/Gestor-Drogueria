@@ -7,14 +7,18 @@ class UserService {
   async getAllUsers(page = 1, limit = 10, search = '') {
     const offset = (page - 1) * limit;
 
-    // búsqueda compatible con SQLite (case-insensitive)
-    const whereClause = search ? {
-      [Op.or]: [
-        where(fn('LOWER', col('username')), { [Op.like]: `%${search.toLowerCase()}%` }),
-        where(fn('LOWER', col('full_name')), { [Op.like]: `%${search.toLowerCase()}%` }),
-        where(fn('LOWER', col('email')), { [Op.like]: `%${search.toLowerCase()}%` })
-      ]
-    } : {};
+    const whereClause = { is_active: true }; // Solo usuarios activos por defecto
+
+    if (search) {
+      Object.assign(whereClause, {
+        [Op.or]: [
+          where(fn('LOWER', col('User.username')), { [Op.like]: `%${search.toLowerCase()}%` }),
+          where(fn('LOWER', col('User.full_name')), { [Op.like]: `%${search.toLowerCase()}%` }),
+          where(fn('LOWER', col('User.email')), { [Op.like]: `%${search.toLowerCase()}%` }),
+          where(fn('LOWER', col('User.num_doc')), { [Op.like]: `%${search.toLowerCase()}%` }) // Buscar por num_doc
+        ]
+      });
+    }
 
     const { count, rows } = await User.findAndCountAll({
       where: whereClause,
@@ -40,39 +44,54 @@ class UserService {
       attributes: { exclude: ['password'] }
     });
 
-    if (!user) {
-      throw AppError.notFound('Usuario no encontrado', 'USER_NOT_FOUND');
+    if (!user || !user.is_active) { // Solo usuarios activos
+      throw AppError.notFound('Usuario no encontrado o inactivo', 'USER_NOT_FOUND');
     }
 
     return user;
   }
 
-  async getUserByUsername(username) {
+  async getUserByUsername(usernameOrNumDoc) { // Puede buscar por username o num_doc
     const user = await User.findOne({
-      where: { username },
+      where: { 
+        [Op.or]: [{ username: usernameOrNumDoc }, { num_doc: usernameOrNumDoc }],
+        is_active: true
+      },
       attributes: { exclude: ['password'] }
     });
   
     if (!user) {
-      throw AppError.notFound('Usuario no encontrado', 'USER_NOT_FOUND');
+      throw AppError.notFound('Usuario no encontrado o inactivo', 'USER_NOT_FOUND');
     }
   
     return user;
   }
 
   async createUser(userData) {
-    // Verificar si el username o email ya existen
+    // Generar username si no se provee, usando num_doc
+    if (!userData.username && userData.num_doc) {
+      userData.username = userData.num_doc;
+    }
+    // Derivar full_name si no se provee, usando name y last_name
+    if (!userData.full_name && userData.name) {
+      userData.full_name = userData.last_name ? `${userData.name} ${userData.last_name}` : userData.name;
+    }
+
+    // Verificar unicidad de username y num_doc
     const existingUser = await User.findOne({
       where: {
         [Op.or]: [
           { username: userData.username },
+          { num_doc: userData.num_doc },
           ...(userData.email ? [{ email: userData.email }] : [])
         ]
       }
     });
 
     if (existingUser) {
-      throw AppError.badRequest('El username o email ya están en uso', null, 'USER_EXISTS');
+      const field = existingUser.username === userData.username ? 'username' : 
+                    existingUser.num_doc === userData.num_doc ? 'número de documento' : 'email';
+      throw AppError.badRequest(`El ${field} ya está en uso`, null, 'USER_EXISTS');
     }
 
     const user = await User.create(userData);
@@ -83,28 +102,35 @@ class UserService {
 
   async updateUser(id, userData) {
     const user = await User.findByPk(id);
-    if (!user) {
-      throw AppError.notFound('Usuario no encontrado', 'USER_NOT_FOUND');
+    if (!user || !user.is_active) {
+      throw AppError.notFound('Usuario no encontrado o inactivo', 'USER_NOT_FOUND');
     }
 
-    // Si se está actualizando username o email, verificar unicidad
-    if (userData.username || userData.email) {
-      const whereClause = {
-        id: { [Op.ne]: id }
-      };
+    // Generar full_name si name o last_name cambian o se proveen
+    if (userData.name || userData.last_name) {
+      const currentName = userData.name || user.name;
+      const currentLastName = userData.last_name || user.last_name;
+      userData.full_name = currentLastName ? `${currentName} ${currentLastName}` : currentName;
+    }
 
-      if (userData.username) {
-        whereClause.username = userData.username;
-      }
+    // Verificar unicidad de username, num_doc o email si se están actualizando
+    const whereClause = {
+        id: { [Op.ne]: id } // Excluir al propio usuario
+    };
 
-      if (userData.email) {
-        whereClause.email = userData.email;
-      }
+    const uniqueFields = [];
+    if (userData.username && userData.username !== user.username) uniqueFields.push({ username: userData.username });
+    if (userData.num_doc && userData.num_doc !== user.num_doc) uniqueFields.push({ num_doc: userData.num_doc });
+    if (userData.email && userData.email !== user.email) uniqueFields.push({ email: userData.email });
 
-      const existingUser = await User.findOne({ where: whereClause });
-      if (existingUser) {
-        throw AppError.badRequest('El username o email ya están en uso', null, 'USER_EXISTS');
-      }
+    if (uniqueFields.length > 0) {
+        Object.assign(whereClause, { [Op.or]: uniqueFields });
+        const existingUser = await User.findOne({ where: whereClause });
+        if (existingUser) {
+            const field = existingUser.username === userData.username ? 'username' : 
+                          existingUser.num_doc === userData.num_doc ? 'número de documento' : 'email';
+            throw AppError.badRequest(`El ${field} ya está en uso`, null, 'USER_EXISTS');
+        }
     }
 
     const updated = await user.update(userData);
