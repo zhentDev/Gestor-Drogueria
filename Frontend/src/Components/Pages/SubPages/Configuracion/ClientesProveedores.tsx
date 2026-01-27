@@ -1,13 +1,7 @@
 import React, { useState } from "react";
-import {
-  Send,
-  XCircle,
-  Plus,
-  FileEdit,
-  Download,
-  Search,
-  Users,
-} from "lucide-react";
+import { Send, XCircle, Plus, FileEdit, Download, Users } from "lucide-react";
+import { useTableControls } from "../../../../hooks/useTableControls";
+import { TableControls } from "../../../TableControls";
 
 // --- DEFINICIÓN DE TIPOS ---
 interface Partner {
@@ -27,9 +21,8 @@ const ClientesProveedores: React.FC = () => {
     "proveedores" | "clientes" | "locales"
   >("proveedores");
   const [showForm, setShowForm] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
 
-  // Datos de ejemplo basados en tu tabla
+  // Datos de ejemplo
   const data: Partner[] = [
     {
       id: "15637",
@@ -64,7 +57,29 @@ const ClientesProveedores: React.FC = () => {
       telefono: "0",
       ciudad: "MAGANGUE",
     },
+    ...Array.from({ length: 20 }, (_, i) => ({
+      id: `${27000 + i}`,
+      tipoDoc: "NIT",
+      numDoc: `${901000000 + i}`,
+      dv: "1",
+      razonSocial: `Proveedor Ficticio ${i + 1}`,
+      direccion: `Calle Falsa 123-${i}`,
+      contacto: `Contacto ${i + 1}`,
+      telefono: `31012345${i < 10 ? "0" : ""}${i}`,
+      ciudad: "BOGOTA",
+    })),
   ];
+
+  const {
+    paginatedData,
+    handleSearch,
+    handleRowsPerPageChange,
+    ...tableControls
+  } = useTableControls({
+    initialData: data,
+    searchKeys: ["numDoc", "razonSocial", "contacto", "ciudad"],
+    initialRowsPerPage: 5,
+  });
 
   const handleEdit = (id: string) => {
     console.log("Editando tercero:", id);
@@ -74,7 +89,6 @@ const ClientesProveedores: React.FC = () => {
   return (
     <div className="p-4 md:p-6 bg-gray-100 min-h-screen font-sans">
       <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
-        {/* Cabecera del Panel */}
         <div className="bg-gray-50 p-4 border-b border-gray-200">
           <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
             <Users className="text-blue-600" /> Gestión de Proveedores y
@@ -83,7 +97,6 @@ const ClientesProveedores: React.FC = () => {
         </div>
 
         <div className="p-4 md:p-6">
-          {/* Navegación de Tabs */}
           <div className="flex border-b border-gray-200 mb-6 overflow-x-auto">
             <TabButton
               label="Proveedores"
@@ -102,11 +115,9 @@ const ClientesProveedores: React.FC = () => {
             />
           </div>
 
-          {/* Formulario de Registro (Condicional) */}
           {showForm && (
             <form className="bg-gray-50 p-6 rounded-xl border border-blue-100 mb-8 animate-in fade-in slide-in-from-top-4 duration-300">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Selección de Tipo */}
                 <div className="col-span-full">
                   <label className="block text-xs font-bold text-gray-500 uppercase mb-2">
                     Tipo de Tercero:
@@ -135,7 +146,6 @@ const ClientesProveedores: React.FC = () => {
                     />
                   </div>
                 </div>
-
                 <div className="space-y-4">
                   <InputField
                     label="Tipo Documento"
@@ -155,7 +165,6 @@ const ClientesProveedores: React.FC = () => {
                     required
                   />
                 </div>
-
                 <div className="space-y-4">
                   <InputField
                     label="Ciudad"
@@ -169,13 +178,10 @@ const ClientesProveedores: React.FC = () => {
                     <InputField label="Teléfono Contacto" type="number" />
                   </div>
                 </div>
-
                 <div className="col-span-full">
                   <InputField label="Email" type="email" />
                 </div>
               </div>
-
-              {/* Botones de Acción Formulario */}
               <div className="flex justify-center gap-4 mt-8">
                 <button
                   type="button"
@@ -194,7 +200,6 @@ const ClientesProveedores: React.FC = () => {
             </form>
           )}
 
-          {/* Botón Agregar (Solo visible si el form está oculto) */}
           {!showForm && (
             <div className="flex justify-center mb-8">
               <button
@@ -206,106 +211,79 @@ const ClientesProveedores: React.FC = () => {
             </div>
           )}
 
-          {/* Barra de Herramientas de Tabla */}
-          <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
-            <button className="flex items-center gap-2 px-4 py-1.5 bg-green-600 text-white rounded text-sm font-bold hover:bg-green-700 transition shadow">
-              <Download size={16} /> Exportar Excel
-            </button>
+          <TableControls
+            searchTerm={tableControls.searchTerm}
+            handleSearch={handleSearch}
+            rowsPerPage={tableControls.rowsPerPage}
+            handleRowsPerPageChange={handleRowsPerPageChange}
+            totalResults={tableControls.totalResults}
+            currentPage={tableControls.currentPage}
+            pageCount={tableControls.pageCount}
+            goToPage={tableControls.goToPage}
+            nextPage={tableControls.nextPage}
+            prevPage={tableControls.prevPage}
+            searchPlaceholder="Buscar por documento, razón social..."
+          />
 
-            <div className="relative">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                size={18}
-              />
-              <input
-                type="text"
-                placeholder="Buscar..."
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none w-64"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Tabla de Resultados */}
-          <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm">
+          <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm mt-4">
             <table className="w-full text-left text-sm border-collapse bg-white">
               <thead className="bg-gray-50 text-gray-700 uppercase text-[11px] font-black tracking-wider">
                 <tr>
-                  <th className="p-3 border-r border-b">Acción</th>
-                  <th className="p-3 border-r border-b">T. Documento</th>
-                  <th className="p-3 border-r border-b">Documento</th>
-                  <th className="p-3 border-r border-b">DV</th>
-                  <th className="p-3 border-r border-b">Razón Social</th>
-                  <th className="p-3 border-r border-b">Dirección</th>
-                  <th className="p-3 border-r border-b">Contacto</th>
-                  <th className="p-3 border-r border-b">Teléfono</th>
-                  <th className="p-3 border-b">Ciudad</th>
+                  <th className="p-3">Acción</th>
+                  <th className="p-3">T. Documento</th>
+                  <th className="p-3">Documento</th>
+                  <th className="p-3">DV</th>
+                  <th className="p-3">Razón Social</th>
+                  <th className="p-3">Dirección</th>
+                  <th className="p-3">Contacto</th>
+                  <th className="p-3">Teléfono</th>
+                  <th className="p-3">Ciudad</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {data.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="even:bg-gray-50 hover:bg-blue-50 transition-colors"
-                  >
-                    <td className="p-2 border-r">
-                      <button
-                        onClick={() => handleEdit(item.id)}
-                        className="flex items-center gap-1 px-3 py-1 bg-blue-600 text-white rounded text-[11px] font-bold hover:bg-blue-700 transition"
-                      >
-                        <FileEdit size={12} /> EDITAR
-                      </button>
+                {paginatedData.length > 0 ? (
+                  paginatedData.map((item) => (
+                    <tr
+                      key={item.id}
+                      className="even:bg-gray-50 hover:bg-blue-50 transition-colors"
+                    >
+                      <td className="p-2">
+                        <button
+                          onClick={() => handleEdit(item.id)}
+                          className="flex items-center gap-1 px-3 py-1 bg-blue-600 text-white rounded text-[11px] font-bold hover:bg-blue-700 transition"
+                        >
+                          <FileEdit size={12} /> EDITAR
+                        </button>
+                      </td>
+                      <td className="p-3">{item.tipoDoc}</td>
+                      <td className="p-3 font-mono">{item.numDoc}</td>
+                      <td className="p-3 text-center">{item.dv}</td>
+                      <td className="p-3 font-bold uppercase">
+                        {item.razonSocial}
+                      </td>
+                      <td className="p-3 text-gray-500 italic">
+                        {item.direccion}
+                      </td>
+                      <td className="p-3">{item.contacto}</td>
+                      <td className="p-3">{item.telefono}</td>
+                      <td className="p-3">{item.ciudad}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={9} className="text-center p-8 text-gray-500">
+                      No se encontraron resultados.
                     </td>
-                    <td className="p-3 border-r">{item.tipoDoc}</td>
-                    <td className="p-3 border-r font-mono">{item.numDoc}</td>
-                    <td className="p-3 border-r text-center">{item.dv}</td>
-                    <td className="p-3 border-r font-bold uppercase">
-                      {item.razonSocial}
-                    </td>
-                    <td className="p-3 border-r text-gray-500 italic">
-                      {item.direccion}
-                    </td>
-                    <td className="p-3 border-r">{item.contacto}</td>
-                    <td className="p-3 border-r">{item.telefono}</td>
-                    <td className="p-3">{item.ciudad}</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
-          </div>
-
-          {/* Paginación (Simulada) */}
-          <div className="flex justify-between items-center mt-6 text-sm text-gray-600">
-            <span>
-              Mostrando registros 1 al {data.length} de {data.length}{" "}
-              encontrados
-            </span>
-            <div className="flex gap-1">
-              <button
-                disabled
-                className="px-3 py-1 border rounded bg-gray-50 text-gray-400"
-              >
-                Anterior
-              </button>
-              <button className="px-3 py-1 border rounded bg-blue-600 text-white font-bold">
-                1
-              </button>
-              <button
-                disabled
-                className="px-3 py-1 border rounded bg-gray-50 text-gray-400"
-              >
-                Siguiente
-              </button>
-            </div>
           </div>
         </div>
       </div>
     </div>
   );
 };
-
-// --- COMPONENTES AUXILIARES PARA LIMPIEZA DE CÓDIGO ---
 
 const TabButton = ({
   label,
@@ -374,7 +352,10 @@ const InputField = ({
       {label} {required && <span className="text-red-500">*</span>}
     </label>
     {type === "select" ? (
-      <select aria-label={label} className="bg-transparent border-b-2 border-gray-300 focus:border-blue-600 outline-none py-1 text-sm transition font-medium">
+      <select
+        aria-label={label}
+        className="bg-transparent border-b-2 border-gray-300 focus:border-blue-600 outline-none py-1 text-sm transition font-medium"
+      >
         {options?.map((opt) => (
           <option key={opt} value={opt}>
             {opt}

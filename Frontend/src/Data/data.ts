@@ -5,48 +5,49 @@ import { FaMoneyBillTransfer } from "react-icons/fa6";
 import { MdOutlineInventory } from "react-icons/md";
 import { FcDataConfiguration } from "react-icons/fc";
 import { FaWallet } from "react-icons/fa";
+import { PATHS } from "./paths";
 
 export const navBarLinks = [
   {
     id: 1,
     name: "Inicio",
-    link: "/",
+    link: PATHS.HOME,
     icon: BsOpencollective,
   },
   {
     id: 2,
     name: "Compras",
-    link: "/viewPedidos",
+    link: PATHS.COMPRAS,
     icon: FaWallet,
   },
   {
     id: 3,
     name: "Ventas",
-    link: "/viewFacturacionHor",
+    link: PATHS.VENTAS,
     icon: MdSell,
   },
   {
     id: 4,
     name: "Gestión Cajas",
-    link: "/menuCajas",
+    link: PATHS.CAJAS,
     icon: FaMoneyBillTransfer,
   },
   {
     id: 5,
     name: "Inventarios",
-    link: "/viewInventarios",
+    link: PATHS.INVENTARIOS,
     icon: MdOutlineInventory,
   },
   {
     id: 6,
     name: "Facturas",
-    link: "/viewListFactura",
+    link: PATHS.FACTURAS,
     icon: FaFileInvoiceDollar,
   },
   {
     id: 7,
     name: "Configuración",
-    link: "/menuConfiguracion",
+    link: PATHS.CONFIGURACION,
     icon: FcDataConfiguration,
   },
 ];
@@ -55,46 +56,46 @@ export const subNavBarLinks = [
   {
     id: 8,
     name: "Inventarios/Productos",
-    link: "/maestraProd",
+    link: PATHS.INVENTARIOS_PRODUCTOS,
   },
   {
     id: 9,
     name: "Inventarios/Informe",
-    link: "/viewinfoinventario",
+    link: PATHS.INVENTARIOS_INFORME,
   },
   {
     id: 10,
     name: "Inventarios/Masivos Precios Venta",
-    link: "/masivoPreciosVenta",
+    link: PATHS.INVENTARIOS_PRECIOS,
   },
   {
     id: 11,
     name: "Caja/Gestión",
-    link: "/viewGestionCajas",
+    link: PATHS.CAJAS_GESTION,
   },
   {
     id: 12,
     name: "Caja/Salida de Caja",
-    link: "/viewGastos",
+    link: PATHS.CAJAS_GASTOS,
   },
   {
     id: 13,
     name: "Configuracion/Clientes",
-    link: "/viewClientes",
+    link: PATHS.CONFIGURACION_CLIENTES,
   },
   {
     id: 14,
     name: "Configuracion/Permisos",
-    link: "/viewPermisos",
+    link: PATHS.CONFIGURACION_EMPLEADOS,
   },
   {
     id: 15,
     name: "Configuracion/Cajas",
-    link: "/viewConfiguracionCajas",
+    link: PATHS.CONFIGURACION_CAJAS,
   },
   {
     id: 16,
     name: "Configuracion/Ubicaciones",
-    link: "/viewUbicaciones",
+    link: PATHS.CONFIGURACION_UBICACIONES,
   },
 ];

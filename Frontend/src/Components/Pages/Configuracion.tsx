@@ -1,5 +1,6 @@
-import { Users, UserCog, Archive, Package } from "lucide-react";
+import { Users, UserCog, Archive, Package, ShieldCheck } from "lucide-react";
 import ButtonPage from "../ButtonPage";
+import { PATHS } from "../../Data/paths";
 
 const Configuracion = () => {
   // Datos para los botones de la página de configuración
@@ -7,26 +8,31 @@ const Configuracion = () => {
     {
       title: "Clientes/Proveedores",
       description: "Agregue y actualice sus proveedores y clientes.",
-      linkPage: "/viewClientes",
+      linkPage: PATHS.CONFIGURACION_CLIENTES,
       icon: <Users size={48} strokeWidth={1.5} />,
     },
     {
-      title: "Empleados/Permisos",
-      description:
-        "Crear, actualizar, activar/desactivar usuarios y gestión de privilegios.",
-      linkPage: "/viewPermisos",
+      title: "Empleados",
+      description: "Crear, actualizar, y gestionar usuarios.",
+      linkPage: PATHS.CONFIGURACION_EMPLEADOS,
       icon: <UserCog size={48} strokeWidth={1.5} />,
+    },
+    {
+      title: "Roles y Permisos",
+      description: "Defina los roles y sus permisos en el sistema.",
+      linkPage: PATHS.CONFIGURACION_ROLES,
+      icon: <ShieldCheck size={48} strokeWidth={1.5} />,
     },
     {
       title: "Configuración de cajas",
       description: "Lista, modificación y creación de cajas.",
-      linkPage: "/viewConfiguracionCajas",
+      linkPage: PATHS.CONFIGURACION_CAJAS,
       icon: <Archive size={48} strokeWidth={1.5} />,
     },
     {
       title: "Ubicación de productos",
       description: "Gestione las ubicaciones de los productos.",
-      linkPage: "/viewUbicaciones",
+      linkPage: PATHS.CONFIGURACION_UBICACIONES,
       icon: <Package size={48} strokeWidth={1.5} />,
     },
   ];
