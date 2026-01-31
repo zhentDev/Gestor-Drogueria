@@ -1,8 +1,10 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
+import { autoUpdater } from 'electron-updater';
+
 // import { session } from 'electron'
 // import os from 'node:os';
 
@@ -41,8 +43,11 @@ function createWindow() {
       nodeIntegration: true,
       contextIsolation: true,
     },
-fullscreen: false,
+    fullscreen: false,
   });
+
+  // Verificar actualizaciones al iniciar
+  autoUpdater.checkForUpdatesAndNotify();
 
   win.maximize();
 
@@ -54,7 +59,7 @@ fullscreen: false,
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL)
   } else {
-    // win.loadFile('dist/index.html')
+    // Usar path absoluto para evitar problemas de resolución relativa
     win.loadFile(path.join(RENDERER_DIST, 'index.html'))
   }
 }
@@ -77,13 +82,66 @@ app.on('activate', () => {
   }
 })
 
-app.whenReady().then(() => {
-  installExtension([REACT_DEVELOPER_TOOLS])
-    .then(([react]) => {
-      console.log(`Added Extensions:  ${react.name}`)
-      createWindow()
-    })
-    .catch((err) => console.log('An error occurred: ', err));
+// Eventos del autoUpdater
+autoUpdater.on('update-available', () => {
+  win?.webContents.send('update_available');
+});
+
+autoUpdater.on('update-downloaded', () => {
+  win?.webContents.send('update_downloaded');
+});
+
+ipcMain.on('restart_app', () => {
+  autoUpdater.quitAndInstall();
+});
+
+
+app.whenReady().then(async () => {
+  // Solo instalar devtools en desarrollo
+  if (process.env.VITE_DEV_SERVER_URL) {
+    try {
+      await installExtension(REACT_DEVELOPER_TOOLS);
+      console.log('Added Extension: React DevTools');
+    } catch (err) {
+      console.log('An error occurred loading DevTools: ', err);
+    }
+  } else {
+    // In Production: Spawn Backend
+    startBackend();
+  }
+
+  createWindow();
+});
+
+import { fork, ChildProcess } from 'child_process';
+
+let backendProcess: ChildProcess | null = null;
+
+function startBackend() {
+  const backendPath = path.join(process.resourcesPath, 'backend');
+  const scriptPath = path.join(backendPath, 'bin', 'www');
+
+  console.log('Starting backend from:', scriptPath);
+
+  backendProcess = fork(scriptPath, [], {
+    cwd: backendPath,
+    env: { ...process.env, PORT: '3000', NODE_ENV: 'production' }
+  });
+
+  backendProcess.on('error', (err) => {
+    console.error('Backend failed to start:', err);
+  });
+
+  backendProcess.on('exit', (code, signal) => {
+    console.log(`Backend process exited with code ${code} and signal ${signal}`);
+  });
+}
+
+app.on('before-quit', () => {
+  if (backendProcess) {
+    console.log('Killing backend process...');
+    backendProcess.kill();
+  }
 });
 
 // app.whenReady().then(async () => {

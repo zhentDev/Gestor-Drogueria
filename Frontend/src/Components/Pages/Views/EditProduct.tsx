@@ -2,11 +2,20 @@ import PercentageInput from "@/Components/PercentageInput";
 import SingleSelect from "@/Components/SingleSelect";
 import React, { useState } from "react";
 
+interface Product {
+    id: number;
+    name: string;
+    manufacturer: string;
+    quantity: number;
+    unit: string;
+}
+
 interface EditProductProps {
+  product: Product;
   onClose: () => void;
 }
 
-const EditProduct: React.FC<EditProductProps> = ({ onClose }) => {
+const EditProduct: React.FC<EditProductProps> = ({ product: _product, onClose }) => {
 
   const [isMosdalOpenHelp, setIsMosdalOpenHelp] = useState(false);
   const handleOpenModalHelp = () => {

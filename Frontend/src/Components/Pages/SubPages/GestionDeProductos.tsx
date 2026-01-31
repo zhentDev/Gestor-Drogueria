@@ -152,7 +152,15 @@ function GestionDeProductos() {
 }
 
 // Helper component for action buttons in the table
-const ActionButton = ({ onClick, icon: Icon, title, className = '' }) => (
+// Helper component for action buttons in the table
+interface ActionButtonProps {
+    onClick: () => void;
+    icon: React.ElementType;
+    title: string;
+    className?: string;
+}
+
+const ActionButton: React.FC<ActionButtonProps> = ({ onClick, icon: Icon, title, className = '' }) => (
     <button
         onClick={onClick}
         title={title}

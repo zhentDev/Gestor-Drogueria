@@ -1,16 +1,54 @@
 {
   "name": "gestor-drogueria",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.5",
+  "description": "Gestor de Droguería",
+  "author": {
+    "name": "zhentDev",
+    "email": "support@zhentdev.com"
+  },
   "type": "module",
+  "build": {
+    "appId": "com.zhentdev.drogueriacallemango",
+    "productName": "Gestor Drogueria",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "zhentDev",
+        "repo": "Gestor-Drogueria"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "extraResources": [
+        {
+          "from": "backend-build",
+          "to": "backend"
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "files": [
+      "dist",
+      "dist-electron",
+      "package.json"
+    ]
+  },
   "scripts": {
     "dev": "concurrently \"bun vite\" \"cd ../Backend && npm run dev\"",
-    "build": "tsc && vite build && electron-builder",
+    "build": "node scripts/prepare-backend.cjs && tsc && vite build && electron-builder",
+    "publish": "node scripts/prepare-backend.cjs && tsc && vite build && electron-builder --publish always",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
     "concurrently": "^9.2.1",
+    "electron-updater": "^6.1.8",
     "framer-motion": "^12.23.12",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
