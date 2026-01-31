@@ -2,22 +2,32 @@ import MainBanner from "../MainBanner";
 import ProductTable from "../ProductTable";
 import Search from "../Search";
 import CreateProvider from "../Pages/Modals/CreateProvider";
+import CreateProduct from "../Pages/Modals/CreateProduct";
 import { useState } from "react";
 
 function Compras() {
-  const [isModalOpenDetails, setIsModalOpenDetails] = useState(false);
+  const [isModalOpenProvider, setIsModalOpenProvider] = useState(false);
 
-  const handleOpenModalDetails = () => {
-    setIsModalOpenDetails(true);
+  const handleOpenModalProvider = () => {
+    setIsModalOpenProvider(true);
   };
-  const handleCloseModalDetails = () => {
-    setIsModalOpenDetails(false);
+  const handleCloseModalProvider = () => {
+    setIsModalOpenProvider(false);
+  };
+
+  const [isModalOpenProduct, setIsModalOpenProduct] = useState(false);
+
+  const handleOpenModalProduct = () => {
+    setIsModalOpenProduct(true);
+  };
+  const handleCloseModalProduct = () => {
+    setIsModalOpenProduct(false);
   };
 
   return (
     <div className="h-full w-10/12 flex flex-col justify-center items-center mx-auto">
       <MainBanner />
-      <div className="h-5/6 w-full flex flex-col justify-between items-center p-0 m-0 shadow-md rounded-lg border border-gray-200 gap-2">
+      <div className="h-auto w-full flex flex-col justify-between items-center p-0 m-0 shadow-md rounded-lg border border-gray-200 gap-2">
         <section className="h-1/6 my-0 px-5 flex w-full items-center justify-between">
           <div className="flex gap-1 flex-col w-auto h-full justify-center">
             <span className="text-primary font-bold w-30 mr-1">
@@ -29,17 +39,24 @@ function Compras() {
           </div>
           <div className="flex gap-5 justify-around mx-5 w-full max-w-max">
             <button
-              onClick={handleOpenModalDetails}
+              onClick={handleOpenModalProvider}
               className="bg-slate-300 border-indigo-800 rounded-xl px-4 py-1 text-center h-auto w-auto align-middle shadow-md shadow-emerald-600 border-opacity-60 border-2 hover:border-opacity-0 hover:brightness-90 font-semibold"
             >
               Crear Proveedor
             </button>
-            <button className="bg-slate-300 border-indigo-800 rounded-xl px-4 py-1 text-center h-auto w-auto align-middle shadow-md shadow-emerald-600 border-opacity-60 border-2 hover:border-opacity-0 hover:brightness-90 font-semibold">
+            <CreateProvider
+              isOpen={isModalOpenProvider}
+              onClose={handleCloseModalProvider}
+            />
+            <button
+              onClick={handleOpenModalProduct}
+              className="bg-slate-300 border-indigo-800 rounded-xl px-4 py-1 text-center h-auto w-auto align-middle shadow-md shadow-emerald-600 border-opacity-60 border-2 hover:border-opacity-0 hover:brightness-90 font-semibold"
+            >
               Crear Producto
             </button>
-            <CreateProvider
-              isOpen={isModalOpenDetails}
-              onClose={handleCloseModalDetails}
+            <CreateProduct
+              isOpen={isModalOpenProduct}
+              onClose={handleCloseModalProduct}
             />
             <button className="bg-secondary border-indigo-800 rounded-xl px-4 py-1 text-center h-auto w-auto align-middle shadow-md shadow-emerald-600 border-opacity-30 border-2 hover:border-opacity-0 hover:brightness-110 font-semibold">
               Eliminar compra Actual

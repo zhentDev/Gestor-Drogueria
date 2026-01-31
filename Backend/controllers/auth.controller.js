@@ -12,8 +12,8 @@ class AuthController {
       throw AppError.badRequest('Datos de entrada inválidos', errors.array(), 'BAD_REQUEST');
     }
 
-    const { username, password } = req.body;
-    const result = await authService.login(username, password);
+    const { tipo_doc, num_doc, password } = req.body;
+    const result = await authService.login(tipo_doc, num_doc, password);
 
     res.json({
       success: true,

@@ -2,18 +2,22 @@ import PercentageInput from "@/Components/PercentageInput";
 import SingleSelect from "@/Components/SingleSelect";
 import React, { useState } from "react";
 
-interface EditProductProps {
+interface CreateProductProps {
+  isOpen: boolean;
   onClose: () => void;
 }
 
-const EditProduct: React.FC<EditProductProps> = ({ onClose }) => {
+const CreateProduct: React.FC<CreateProductProps> = ({ isOpen, onClose }) => {
+  if (!isOpen) {
+    return null;
+  }
 
-  const [isMosdalOpenHelp, setIsMosdalOpenHelp] = useState(false);
+  const [isMosdalOpenHelp_, setisMosdalOpenHelp_] = useState(false);
   const handleOpenModalHelp = () => {
-    setIsMosdalOpenHelp(true);
+    setisMosdalOpenHelp_(true);
   };
   const handleCloseModalHelp = () => {
-    setIsMosdalOpenHelp(false);
+    setisMosdalOpenHelp_(false);
   };
 
   const [requiresFormula, setRequiresFormula] = useState("no");
@@ -85,11 +89,14 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="flex flex-wrap w-full justify-start items-start h-full flex-col gap-5">
-      {isMosdalOpenHelp ? (
+    // <div className="flex flex-wrap w-full justify-start items-start h-full flex-col gap-5 bg-black/5 p-5">
+    <div className="absolute inset-10 bg-gray-100 flex flex-col items-center justify-center w-11/12 p-8 h-fit">
+      {isMosdalOpenHelp_ ? (
         <div
           className={`fixed inset-0 z-50 flex items-center justify-center w-full bg-gray-500 bg-opacity-25 h-full p-8 flex-col ${
-            isMosdalOpenHelp ? "backdrop-blur-sm bg-gray-500 bg-opacity-75" : ""
+            isMosdalOpenHelp_
+              ? "backdrop-blur-sm bg-gray-500 bg-opacity-75"
+              : ""
           }`}
         >
           <div className="rounded-xl bg-white flex flex-col w-2/4 h-2/5 justify-center items-center gap-4">
@@ -111,9 +118,9 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose }) => {
           </div>
         </div>
       ) : null}
-      <div className="w-screen h-fit m-5 p-3 border-2 border-rose-500 rounded-lg flex flex-col items-center justify-center flex-wrap shadow-md shadow-slate-400 drop-shadow-xl gap-6">
+      <div className="w-full h-full m-5 p-3 border-2 border-rose-500 rounded-lg flex flex-col items-center justify-center flex-wrap shadow-md shadow-slate-400 drop-shadow-xl gap-6">
         <div className="h-fit items-center flex justify-between w-full border-b-2 border-gray-300 py-3">
-          <span className="mx-2 ml-14">Gestión de productos</span>
+          <span className="mx-2 ml-14">Crear Producto</span>
           <button
             onClick={onClose}
             className="bg-red-400 hover:bg-red-700 text-slate-800 font-bold py-1 px-4 rounded mr-16"
@@ -401,48 +408,33 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose }) => {
         </div>
 
         <div className="grid grid-cols-12 w-9/12 gap-4">
-          <span className="col-span-12">
-            Prestaciónes, Contenido y Precios de Venta
-          </span>
+          <span className="col-span-12">Prestaciónes producto</span>
           <div className="border-2 border-slate-400 rounded-lg col-span-12 p-4 flex flex-col gap-4">
             <h2 className="w-full text-center text-indigo-700 font-semibold text-2xl">
               General
             </h2>
             <div className="col-span-12 p-4 flex flex-col gap-4">
               <div className="grid grid-cols-12 gap-2">
-                <label className="col-span-2 h-8 pb-2" htmlFor="">
-                  Presentación
-                  <select className="w-full h-8 pb-2" name="" id="">
+                <label className="col-span-8 h-8 pb-2" htmlFor="">
+                  Presentación Seleccionada
+                  <select className="w-full h-8 pb-2 rounded-lg" name="" id="">
                     <option value="">Unidad</option>
                     <option value="">Sobre</option>
                     <option value="">Caja</option>
+                    <option value="">...</option>
                   </select>
                 </label>
                 <label className="col-span-4" htmlFor="">
-                  Contenido interno, número de unidades
+                  Contenido
                   <input
-                    className="w-full focus:outline-none h-8 pb-2"
-                    type="text"
+                    className="w-full focus:outline-none h-8 pb-2 rounded-lg"
+                    type="number"
                   />
                 </label>
-                <label className="col-span-2" htmlFor="">
-                  % utilidad Deseado
-                  <input
-                    className="w-full col-span-2 focus:outline-none h-8 pb-2"
-                    type="text"
-                  />
-                </label>
-                <label className="col-span-2" htmlFor="">
+                <label className="col-span-2 col-start-6" htmlFor="">
                   - Precio de Venta
                   <input
-                    className="w-full col-span-2 focus:outline-none h-8 pb-2"
-                    type="text"
-                  />
-                </label>
-                <label className="col-span-2" htmlFor="">
-                  % de utilidad Real.
-                  <input
-                    className="w-full col-span-2 focus:outline-none h-8 pb-2"
+                    className="w-full col-span-2 focus:outline-none h-8 pb-2 rounded-lg"
                     type="text"
                   />
                 </label>
@@ -454,21 +446,18 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose }) => {
               Intermedio
             </h2>
             <label id="check">
-              <input
-                type="checkbox"
-                name=""
-                id=""
-                defaultValue="false"
+              <input type="checkbox" name="" id="" defaultValue="false" />
+              <span
+                className="check"
                 onClick={() => setUseIntermedio(!useIntermedio)}
-              />
-              <span className="check"></span>
+              ></span>
               <span className="text usar">Usar</span>
               <span className="text no-usar">No Usar</span>
             </label>
             <div className="col-span-12 p-4 flex flex-col gap-4">
               <div className="grid grid-cols-12 gap-2">
-                <label className="col-span-2" htmlFor="">
-                  Presentación
+                <label className="col-span-3 col-start-2" htmlFor="">
+                  Presentación Seleccionada
                   <select
                     className="w-full h-8 pb-2 rounded-md disabled:border-orange-400 disabled:border-2 disabled:cursor-not-allowed transition-all duration-150"
                     name=""
@@ -481,33 +470,18 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose }) => {
                   </select>
                 </label>
                 <label className="col-span-4" htmlFor="">
-                  Contenido interno, número de unidades
+                  Contenido
                   <input
-                    className="w-full focus:outline-none h-8 pb-2"
-                    type="text"
-                  />
-                </label>
-                <label className="col-span-2">
-                  % utilidad Deseado
-                  <input
-                    className="w-full col-span-2 focus:outline-none h-8 pb-2  rounded-md disabled:border-orange-400 disabled:border-2 disabled:cursor-not-allowed transition-all duration-150"
-                    type="text"
+                    className="w-full focus:outline-none h-8 pb-2 rounded-md disabled:border-orange-400 disabled:border-2 disabled:cursor-not-allowed transition-all duration-150"
                     disabled={!useIntermedio}
                   />
                 </label>
                 <label className="col-span-2">
                   - Precio de Venta
                   <input
-                    className="w-full col-span-2 focus:outline-none h-8 pb-2  rounded-md disabled:border-orange-400 disabled:border-2 disabled:cursor-not-allowed transition-all duration-150"
+                    className="w-full col-span-2 focus:outline-none h-8 pb-2 rounded-md disabled:border-orange-400 disabled:border-2 disabled:cursor-not-allowed transition-all duration-150"
                     type="text"
                     disabled={!useIntermedio}
-                  />
-                </label>
-                <label className="col-span-2">
-                  % de utilidad Real.
-                  <input
-                    className="w-full col-span-2 focus:outline-none h-8 pb-2"
-                    type="text"
                   />
                 </label>
               </div>
@@ -531,10 +505,10 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose }) => {
             </label>
             <div className="col-span-12 p-4 flex flex-col gap-4">
               <div className="grid grid-cols-12 gap-2">
-                <label className="col-span-2" htmlFor="">
-                  Presentación
+                <label className="col-span-3 col-start-2" htmlFor="">
+                  Presentación Seleccionada
                   <select
-                    className="w-full h-8 pb-2  rounded-md disabled:border-orange-400 disabled:border-2 disabled:cursor-not-allowed transition-all duration-150"
+                    className="w-full h-8 pb-2 rounded-md disabled:border-orange-400 disabled:border-2 disabled:cursor-not-allowed transition-all duration-150"
                     name=""
                     id=""
                     disabled={!useMinimo}
@@ -545,16 +519,9 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose }) => {
                   </select>
                 </label>
                 <label className="col-span-4" htmlFor="">
-                  Contenido interno, número de unidades
+                  Contenido
                   <input
-                    className="w-full focus:outline-none h-8 pb-2"
-                    type="text"
-                  />
-                </label>
-                <label className="col-span-2" htmlFor="">
-                  % utilidad Deseado
-                  <input
-                    className="w-full col-span-2 focus:outline-none h-8 pb-2  rounded-md disabled:border-orange-400 disabled:border-2 disabled:cursor-not-allowed transition-all duration-150"
+                    className="w-full focus:outline-none h-8 pb-2 rounded-md disabled:border-orange-400 disabled:border-2 disabled:cursor-not-allowed transition-all duration-150"
                     type="text"
                     disabled={!useMinimo}
                   />
@@ -562,31 +529,13 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose }) => {
                 <label className="col-span-2" htmlFor="">
                   - Precio de Venta
                   <input
-                    className="w-full col-span-2 focus:outline-none h-8 pb-2  rounded-md disabled:border-orange-400 disabled:border-2 disabled:cursor-not-allowed transition-all duration-150"
+                    className="w-full col-span-2 focus:outline-none h-8 pb-2 rounded-md disabled:border-orange-400 disabled:border-2 disabled:cursor-not-allowed transition-all duration-150"
                     type="text"
                     disabled={!useMinimo}
                   />
                 </label>
-                <label className="col-span-2" htmlFor="">
-                  % de utilidad Real.
-                  <input
-                    className="w-full col-span-2 focus:outline-none h-8 pb-2"
-                    type="text"
-                  />
-                </label>
               </div>
             </div>
-          </div>
-          <div className="flex w-full justify-center items-center gap-6 col-span-12 my-4">
-            <button className="bg-slate-300 border-indigo-800 rounded-xl px-4 py-1 text-center h-auto w-auto align-middle shadow-md shadow-emerald-600 border-opacity-60 border-2 hover:border-opacity-0 hover:brightness-90 font-semibold">
-              Editar Producto
-            </button>
-            <button
-              onClick={onClose}
-              className="bg-slate-300 border-indigo-800 rounded-xl px-4 py-1 text-center h-auto w-auto align-middle shadow-md shadow-emerald-600 border-opacity-60 border-2 hover:border-opacity-0 hover:brightness-90 font-semibold"
-            >
-              {"<<Regresar"}
-            </button>
           </div>
         </div>
       </div>
@@ -594,4 +543,4 @@ const EditProduct: React.FC<EditProductProps> = ({ onClose }) => {
   );
 };
 
-export default EditProduct;
+export default CreateProduct;

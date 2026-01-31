@@ -14,16 +14,17 @@ const {
 const AppError = require('../utils/appError.utils');
 
 class AuthService {
-  async login(username, password) {
+  async login(tipo_doc, num_doc, password) {
     const Op = require('sequelize').Op;
     const user = await User.findOne({
       where: { 
-        [Op.or]: [{ username }, { email: username }],
+        tipo_doc,
+        num_doc,
         is_active: true
       }
     }); 
 
-    if (!user) throw new AppError('Error en el usuario indicado', 401);
+    if (!user) throw new AppError('Error en el tipo o número de documento', 401);
 
     const isValid = await user.validatePassword(password);
     if (!isValid) throw new AppError('Contraseña incorrecta', 401);

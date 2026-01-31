@@ -1,5 +1,4 @@
 import require$$0, { app, BrowserWindow } from "electron";
-import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path$2 from "node:path";
 import require$$1$1 from "fs";
@@ -10131,7 +10130,6 @@ dist$1.REDUX_DEVTOOLS = {
 dist$1.MOBX_DEVTOOLS = {
   id: "pfgnfdagidkfgccljigdamigbcnndkod"
 };
-createRequire(import.meta.url);
 const __dirname = path$2.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path$2.join(__dirname, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
@@ -10149,6 +10147,7 @@ function createWindow() {
     },
     fullscreen: false
   });
+  win.maximize();
   win.webContents.on("did-finish-load", () => {
     win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
   });

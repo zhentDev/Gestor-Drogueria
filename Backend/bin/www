@@ -101,6 +101,21 @@ async function start() {
       }
     }
 
+    // SYNC_ALTER=true -> run sequelize.sync({ alter: true })
+    if (process.env.SYNC_ALTER === 'true') {
+      console.log(chalk.yellow('→ SYNC_ALTER=true DETECTED. Running sequelize.sync({ alter: true }) to update schema.'));
+      if (NODE_ENV === 'production') {
+        console.warn(chalk.yellow('⚠️  SYNC_ALTER is not recommended in production. Use migrations instead.'));
+      }
+      try {
+        await sequelize.sync({ alter: true });
+        console.log(chalk.green('✅ sequelize.sync({ alter: true }) completed'));
+      } catch (syncErr) {
+        console.error(chalk.red('❌ sequelize.sync({ alter: true }) failed:'), syncErr.message);
+        // Do not block startup, but warn
+      }
+    }
+
     // 4) Start HTTP server
     server.listen(PORT, HOST, () => {
       prettyStartupLog({ host: HOST, port: PORT, dbOk });

@@ -2,11 +2,19 @@
 const { body } = require('express-validator');
 
 const loginValidation = [
-  body('username')
+  body('tipo_doc')
+    .isIn(['CC', 'NIT', 'CE', 'PAS'])
+    .withMessage('Tipo de documento debe ser CC, NIT, CE o PAS')
     .notEmpty()
-    .withMessage('Username o email es requerido')
-    .isLength({ min: 3 })
-    .withMessage('Username debe tener al menos 3 caracteres'),
+    .withMessage('Tipo de documento es requerido'),
+  
+  body('num_doc')
+    .isLength({ min: 5, max: 20 })
+    .withMessage('Número de documento debe tener entre 5 y 20 caracteres')
+    .matches(/^[a-zA-Z0-9]+$/)
+    .withMessage('Número de documento solo puede contener letras y números')
+    .notEmpty()
+    .withMessage('Número de documento es requerido'),
   
   body('password')
     .notEmpty()
@@ -14,6 +22,7 @@ const loginValidation = [
     .isLength({ min: 6 })
     .withMessage('Contraseña debe tener al menos 6 caracteres')
 ];
+
 
 const changePasswordValidation = [
   body('currentPassword')

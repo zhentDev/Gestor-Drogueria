@@ -1,12 +1,4 @@
-interface ProductTableProps {
-    // props
-    name: string
-    price: number
-    quantity: number
-    total: number
-    opc: string
-    // props
-}
+
 
 // function ProductTable({ name, price, quantity, total, opc }: ProductTableProps ) {
 function ProductTable() {
