@@ -168,28 +168,44 @@ INSERT OR IGNORE INTO settings (setting_key, setting_value, setting_type, descri
 
 const RESET_SQL = `
 PRAGMA foreign_keys = OFF;
+BEGIN TRANSACTION;
 
+-- =============================================
+-- PASO 1: Eliminar datos de tablas relacionadas (orden correcto)
+-- =============================================
+-- Tablas dependientes de ventas
 DELETE FROM cash_movements;
-DELETE FROM inventory_movements;
 DELETE FROM sale_details;
 DELETE FROM sales;
+-- Tablas dependientes de compras
 DELETE FROM purchase_details;
 DELETE FROM purchases;
+-- Tablas de inventario
+DELETE FROM inventory_movements;
+DELETE FROM price_history;
+-- Tablas de productos y lotes
 DELETE FROM product_batches;
 DELETE FROM product_presentations;
-DELETE FROM cash_registers;
-DELETE FROM audit_logs;
-DELETE FROM refresh_tokens;
-DELETE FROM customers;
 DELETE FROM products;
+-- Tablas maestras
 DELETE FROM unit_types;
 DELETE FROM manufacturers;
-DELETE FROM suppliers;
 DELETE FROM categories;
+DELETE FROM suppliers;
+DELETE FROM customers;
+-- Tablas de caja
+DELETE FROM cash_registers;
+-- Tablas de usuarios y seguridad
+DELETE FROM refresh_tokens;
 DELETE FROM users;
+-- Tablas de sistema
+DELETE FROM audit_logs;
 DELETE FROM settings;
+-- =============================================
+-- PASO 2: Reiniciar contadores AUTOINCREMENT
+-- =============================================
 DELETE FROM sqlite_sequence;
-
+COMMIT;
 PRAGMA foreign_keys = ON;
 `;
 
@@ -323,9 +339,7 @@ module.exports = {
     
     const t = await sequelize.transaction();
     try {
-      await execMultiSql(RESET_SQL, { transaction: t });
-      await t.commit();
-      
+      await sequelize.query(RESET_SQL, { raw: true });
       return { 
         success: true, 
         message: 'Base de datos reiniciada exitosamente' 
@@ -439,114 +453,109 @@ module.exports = {
       throw AppError.internal('Error creando venta de prueba', { original: err.message });
     }
   },
-
-  /**
-   * Crea una compra de prueba
-   */
-  async createTestPurchase() {
-    if (process.env.NODE_ENV !== 'development') {
-      throw new AppError.forbidden('createTestPurchase only allowed in development');
-    }
+/**
+ * Crea una compra de prueba
+ * El trigger after_purchase_detail_insert se encarga de:
+ * 1. Crear/actualizar el lote automáticamente
+ * 2. Registrar el movimiento de inventario
+ * 3. Actualizar el batch_id en purchase_details
+ */
+async createTestPurchase() {
+  if (process.env.NODE_ENV !== 'development') {
+    throw new AppError.forbidden('createTestPurchase only allowed in development');
+  }
+  
+  const t = await sequelize.transaction();
+  try {
+    // Buscar usuario admin
+    const admin = await User.findOne({ where: { role: 'admin' } });
     
-    const t = await sequelize.transaction();
-    try {
-      // Buscar usuario admin
-      const admin = await User.findOne({ where: { role: 'admin' } });
-      
-      if (!admin) {
-        throw new AppError.badRequest('Usuario administrador no encontrado. Ejecuta populateDb primero.');
-      }
-
-      // Generar número de factura único
-      const lastPurchase = await Purchase.findOne({ 
-        order: [['id', 'DESC']] 
-      });
-      const nextNumber = lastPurchase ? lastPurchase.id + 1 : 1;
-      const invoiceNumber = `PROV-TEST-${String(nextNumber).padStart(6, '0')}`;
-
-      // Crear la compra
-      const subtotal = 90000; // 50 unidades * 1800
-      const total = subtotal;
-
-      const purchase = await Purchase.create({
-        invoice_number: invoiceNumber,
-        supplier_id: 1,
-        user_id: admin.id,
-        purchase_date: new Date(),
-        subtotal: subtotal,
-        tax: 0,
-        discount: 0,
-        total: total,
-        payment_method: 'transferencia',
-        status: 'completada',
-        notes: 'Compra de prueba desde API'
-      }, { transaction: t });
-
-      // Crear detalle de compra
-      const productId = 1; // NORAVER
-      const quantity = 50; // 50 unidades
-      const unitCost = 1800;
-      const batchNumber = `LOTE-TEST-${Date.now()}`;
-      const expiryDate = new Date();
-      expiryDate.setFullYear(expiryDate.getFullYear() + 2); // +2 años
-
-      const purchaseDetail = await PurchaseDetail.create({
-        purchase_id: purchase.id,
-        product_id: productId,
-        quantity: quantity,
-        unit_price: unitCost,
-        subtotal: quantity * unitCost,
-        expiry_date: expiryDate,
-        batch_number: batchNumber
-      }, { transaction: t });
-
-      // Crear el lote de producto
-      const batch = await ProductBatch.create({
-        product_id: productId,
-        batch_number: batchNumber,
-        expiry_date: expiryDate,
-        quantity: quantity,
-        initial_quantity: quantity,
-        unit_cost: unitCost,
-        purchase_id: purchase.id,
-        location: 'ESTANTE A-1',
-        is_active: true
-      }, { transaction: t });
-
-      // Actualizar batch_id en purchase_detail
-      await purchaseDetail.update({ 
-        batch_id: batch.id 
-      }, { transaction: t });
-
-      await t.commit();
-
-      // Recargar con relaciones
-      await purchase.reload({
-        include: [
-          { 
-            model: PurchaseDetail, 
-            as: 'purchaseDetails',
-            include: [
-              { model: Product, as: 'product' },
-              { model: ProductBatch, as: 'batch' }
-            ]
-          }
-        ]
-      });
-
-      return { 
-        success: true,
-        message: 'Compra de prueba creada exitosamente',
-        data: {
-          purchase,
-          batch
-        }
-      };
-    } catch (err) {
-      await t.rollback();
-      throw AppError.internal('Error creando compra de prueba', { original: err.message });
+    if (!admin) {
+      throw new AppError.badRequest('Usuario administrador no encontrado. Ejecuta populateDb primero.');
     }
-  },
+
+    // Generar número de factura único
+    const lastPurchase = await Purchase.findOne({ 
+      order: [['id', 'DESC']] 
+    });
+    const nextNumber = lastPurchase ? lastPurchase.id + 1 : 1;
+    const invoiceNumber = `PROV-TEST-${String(nextNumber).padStart(6, '0')}`;
+
+    // Crear la compra
+    const subtotal = 90000; // 50 unidades * 1800
+    const total = subtotal;
+
+    const purchase = await Purchase.create({
+      invoice_number: invoiceNumber,
+      supplier_id: 1,
+      user_id: admin.id,
+      purchase_date: new Date(),
+      subtotal: subtotal,
+      tax: 0,
+      discount: 0,
+      total: total,
+      payment_method: 'transferencia',
+      status: 'completada',
+      notes: 'Compra de prueba desde API'
+    }, { transaction: t });
+
+    // Datos del producto
+    const productId = 1; // NORAVER
+    const quantity = 50; // 50 unidades
+    const unitCost = 1800;
+    const batchNumber = `LOTE-TEST-${Date.now()}`;
+    const expiryDate = new Date();
+    expiryDate.setFullYear(expiryDate.getFullYear() + 2); // +2 años
+
+    // IMPORTANTE: Solo crear el detalle de compra
+    // El trigger after_purchase_detail_insert se encargará de:
+    // - Crear el lote automáticamente
+    // - Registrar el movimiento de inventario
+    // - Actualizar el batch_id en purchase_details
+    const purchaseDetail = await PurchaseDetail.create({
+      purchase_id: purchase.id,
+      product_id: productId,
+      quantity: quantity,
+      unit_price: unitCost,
+      subtotal: quantity * unitCost,
+      expiry_date: expiryDate,
+      batch_number: batchNumber
+      // batch_id se actualizará automáticamente por el trigger
+    }, { transaction: t });
+
+    await t.commit();
+
+    // Recargar con relaciones para obtener el batch creado por el trigger
+    await purchase.reload({
+      include: [
+        { 
+          model: PurchaseDetail, 
+          as: 'purchaseDetails',
+          include: [
+            { model: Product, as: 'product' },
+            { model: ProductBatch, as: 'batch' }
+          ]
+        }
+      ]
+    });
+
+    // Obtener el batch creado por el trigger
+    const batch = purchase.purchaseDetails[0]?.batch;
+
+    return { 
+      success: true,
+      message: 'Compra de prueba creada exitosamente',
+      data: {
+        purchase,
+        batch,
+        note: 'El lote y movimiento de inventario fueron creados automáticamente por el trigger'
+      }
+    };
+  } catch (err) {
+    await t.rollback();
+    throw AppError.internal('Error creando compra de prueba', { original: err.message });
+  }
+},
 
   /**
    * Obtiene estadísticas de la base de datos

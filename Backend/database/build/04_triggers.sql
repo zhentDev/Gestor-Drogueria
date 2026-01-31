@@ -3,10 +3,11 @@
 -- =============================================
 DROP TRIGGER IF EXISTS after_purchase_detail_insert;
 
+
 CREATE TRIGGER after_purchase_detail_insert
 AFTER INSERT ON purchase_details
 BEGIN
-    -- Crear o actualizar el lote del producto
+    -- 1. Crear o actualizar el lote del producto
     INSERT INTO product_batches (
         product_id, 
         batch_number, 
@@ -15,6 +16,8 @@ BEGIN
         initial_quantity,
         unit_cost,
         purchase_id,
+        location,
+        is_active,
         created_at,
         updated_at
     )
@@ -26,6 +29,8 @@ BEGIN
         NEW.quantity,
         NEW.unit_price,
         NEW.purchase_id,
+        (SELECT location FROM products WHERE id = NEW.product_id),
+        1,
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
     )
@@ -33,7 +38,17 @@ BEGIN
         quantity = quantity + excluded.quantity,
         updated_at = CURRENT_TIMESTAMP;
     
-    -- Registrar movimiento de inventario
+    -- 2. Actualizar el batch_id en purchase_details inmediatamente
+    UPDATE purchase_details
+    SET batch_id = (
+        SELECT id FROM product_batches 
+        WHERE product_id = NEW.product_id 
+        AND batch_number = COALESCE(NEW.batch_number, 'LOTE-' || NEW.purchase_id || '-' || NEW.product_id)
+        LIMIT 1
+    )
+    WHERE id = NEW.id;
+    
+    -- 3. Registrar movimiento de inventario
     INSERT INTO inventory_movements (
         product_id,
         batch_id,
@@ -46,7 +61,9 @@ BEGIN
         quantity_after,
         unit_cost,
         user_id,
-        movement_date
+        movement_date,
+        created_at,
+        updated_at
     )
     SELECT 
         NEW.product_id,
@@ -60,12 +77,15 @@ BEGIN
         pb.quantity,
         NEW.unit_price,
         pu.user_id,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
     FROM product_batches pb
     INNER JOIN purchases pu ON pu.id = NEW.purchase_id
     WHERE pb.product_id = NEW.product_id 
         AND pb.batch_number = COALESCE(NEW.batch_number, 'LOTE-' || NEW.purchase_id || '-' || NEW.product_id);
-    
+END;
+
     -- Actualizar el batch_id en purchase_details
     UPDATE purchase_details
     SET batch_id = (
