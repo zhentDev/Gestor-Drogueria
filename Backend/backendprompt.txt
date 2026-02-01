@@ -1,0 +1,354 @@
+I'm making a backend for a pharmacy inventory and cash movements., follow the current structure (appjs->routes ->validator -> Controller -> Service.
+
+
+
+Models are already made.
+
+
+
+So i will show you an example of each one of them 
+And  you willl give me the necessary enpoints,
+CRUD if necessary and the other needed functions/endpoints that you consider will be useful for the front end 
+(being sure that it will not affect the base )
+
+Give the best practices you can. 
+
+alright i will show you the purchases endpoint. Autentication , and users endpoints are OK. 
+
+Purchases-
+
+app.js:
+
+if (process.env.NODE_ENV === "development") {
+  const devRouter = require("./routes/dev");
+  app.use("/__dev", devRouter);
+}
+
+app.use("/api/auth", require("./routes/auth.routes")); //app.use('/api/users', require('./routes/users.routes'));
+app.use("/api/users", require("./routes/user.routes"));
+app.use('/api/purchases', require('./routes/purchases.routes'));
+
+purchases.routes.js 
+
+const express = require('express');
+const router = express.Router();
+const purchaseController = require('../controllers/purchases.controller');
+const { authenticateToken } = require('../middlewares/auth.middleware');
+const { 
+  createPurchaseValidation, 
+  updatePurchaseValidation,
+  idParamValidation 
+} = require('../validators/purchase.validator');
+
+// Todas las rutas requieren autenticación
+router.use(authenticateToken);
+
+router.get('/', purchaseController.getAll);
+router.get('/:id', idParamValidation, purchaseController.getById);
+router.post('/', createPurchaseValidation, purchaseController.create);
+router.put('/:id', idParamValidation, updatePurchaseValidation, purchaseController.update);
+router.delete('/:id', idParamValidation, purchaseController.delete);
+
+module.exports = router;
+
+
+purchase.validator.js
+
+const { body, param } = require('express-validator');
+
+const createPurchaseValidation = [
+  body('supplier_id')
+    .notEmpty()
+    .withMessage('El proveedor es requerido')
+    .isInt({ min: 1 })
+    .withMessage('ID de proveedor inválido'),
+  
+  body('purchase_date')
+    .optional()
+    .isISO8601()
+    .withMessage('Fecha de compra inválida'),
+  
+...
+...
+..
+  body('status')
+    .optional()
+    .isIn(['pendiente', 'completada', 'cancelada'])
+    .withMessage('El estado debe ser pendiente, completada o cancelada'),
+  
+  body('notes')
+    .optional()
+    .isString()
+    .withMessage('Las notas deben ser texto')
+];
+
+const updatePurchaseValidation = [
+  body('supplier_id')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('ID de proveedor inválido'),
+  
+  body('purchase_date')
+    .optional()
+    .isISO8601()
+    .withMessage('Fecha de compra inválida'),
+...
+...
+...
+  
+  body('notes')
+    .optional()
+    .isString()
+    .withMessage('Las notas deben ser texto')
+];
+
+const idParamValidation = [
+  param('id')
+    .isInt({ min: 1 })
+    .withMessage('ID inválido')
+];
+
+module.exports = {
+  createPurchaseValidation,
+  updatePurchaseValidation,
+  idParamValidation
+};
+
+purchases.controller.js
+
+const { validationResult } = require('express-validator');
+const purchaseService = require('../services/purchases.service');
+const AppError = require('../utils/appError.utils');
+const catchAsync = require('../utils/catchAsync.utils');
+
+class PurchaseController {
+  // GET /api/purchases
+  getAll = catchAsync(async (req, res) => {
+    const purchases = await purchaseService.getAll();
+    
+    res.json({
+      success: true,
+      message: 'Compras obtenidas exitosamente',
+      data: purchases
+    });
+  });
+
+  // GET /api/purchases/:id
+  getById = catchAsync(async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      throw AppError.badRequest('Datos de entrada inválidos', errors.array(), 'BAD_REQUEST');
+    }
+
+    const { id } = req.params;
+    const purchase = await purchaseService.getById(id);
+    
+    res.json({
+      success: true,
+      message: 'Compra obtenida exitosamente',
+      data: purchase
+    });
+  });
+
+  // POST /api/purchases
+  create = catchAsync(async (req, res) => { 
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      throw AppError.badRequest('Datos de entrada inválidos', errors.array(), 'BAD_REQUEST');
+    }
+
+    // El user_id se obtiene del token de autenticación
+    const purchaseData = {
+      ...req.body,
+      user_id: req.user.id
+    };
+    
+
+    const purchase = await purchaseService.create(purchaseData);
+    
+    res.status(201).json({
+      success: true,
+      message: 'Compra creada exitosamente',
+      data: purchase
+    });
+  });
+
+  // PUT /api/purchases/:id
+  update = catchAsync(async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      throw AppError.badRequest('Datos de entrada inválidos', errors.array(), 'BAD_REQUEST');
+    }
+
+    const { id } = req.params;
+    const purchase = await purchaseService.update(id, req.body);
+    
+    res.json({
+      success: true,
+      message: 'Compra actualizada exitosamente',
+      data: purchase
+    });
+  });
+
+  // DELETE /api/purchases/:id
+  delete = catchAsync(async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      throw AppError.badRequest('Datos de entrada inválidos', errors.array(), 'BAD_REQUEST');
+    }
+
+    const { id } = req.params;
+    await purchaseService.delete(id);
+    
+    res.json({
+      success: true,
+      message: 'Compra eliminada exitosamente',
+      data: null
+    });
+  });
+}
+
+module.exports = new PurchaseController();
+
+
+purchases.service.js
+
+const { Purchase, Supplier, User } = require('../models');
+const AppError = require('../utils/appError.utils');
+const { Op } = require('sequelize');
+
+class PurchaseService {
+  getAll() {
+    return Purchase.findAll({
+      include: [
+        { model: Supplier, as: 'supplier', attributes: ['id','name','email','phone'] },
+        { model: User, as: 'user', attributes: ['id','username','email'] },
+      ],
+      order: [['created_at', 'DESC']],
+    });
+  }
+
+  async getById(id) {
+    const purchase = await Purchase.findByPk(id, {
+      include: [
+        { model: Supplier, as: 'supplier', attributes: ['id','name','email','phone','address'] },
+        { model: User, as: 'user', attributes: ['id','username','email'] },
+      ],
+    });
+    if (!purchase) throw new AppError('Compra no encontrada', 404);
+    return purchase;
+  }
+
+  async create(data) {
+    await this._validateSupplier(data.supplier_id);
+    const purchase = await Purchase.create({
+      ...data,
+      invoice_number: await this._generateInvoice(),
+    }).catch(e => { throw new AppError(e.message, 500); });
+
+    return this.getById(purchase.id);
+  }
+
+  async update(id, data) {
+    const purchase = await Purchase.findByPk(id);
+    if (!purchase) throw new AppError('Compra no encontrada', 404);
+    if (data.supplier_id) await this._validateSupplier(data.supplier_id);
+
+    await purchase.update(data).catch(e => { throw new AppError(e.message, 500); });
+    return this.getById(id);
+  }
+
+  async delete(id) {
+    const purchase = await Purchase.findByPk(id);
+    if (!purchase) throw new AppError('Compra no encontrada', 404);
+    if (purchase.status === 'completada')
+      throw new AppError('No se puede eliminar una compra completada', 400);
+
+    await purchase.destroy();
+    return true;
+  }
+
+  /* ---------- helpers ---------- */
+
+  async _validateSupplier(id) {
+    if (!(await Supplier.findByPk(id)))
+      throw new AppError('Proveedor no encontrado', 404);
+  }
+
+  async _generateInvoice() {
+    const prefix = 'PUR';
+    const ym = new Date().toISOString().slice(0,7).replace('-', '');
+    const last = await Purchase.findOne({
+      where: { invoice_number: { [Op.like]: `${prefix}-${ym}%` } },
+      order: [['invoice_number', 'DESC']],
+    });
+
+    const seq = last ? +last.invoice_number.slice(-4) + 1 : 1;
+    return `${prefix}-${ym}${String(seq).padStart(4,'0')}`;
+  }
+}
+
+module.exports = new PurchaseService();
+
+
+So, I want this for purchase_detail.model.js whcih is :
+
+Business rules:
+- A purchase can have many purchase_details.
+- purchase_details can only be created/updated/deleted while purchase.status = 'pendiente'.
+- Subtotals must be calculated in the backend.
+- purchase_detail should never affect existing purchases or authentication logic.
+
+
+Also add the body content of the POST, UPDATE requests
+// =============================================
+// models/purchase_detail.model.js (ACTUALIZADO)
+// =============================================
+module.exports = (sequelize, DataTypes) => {
+  const PurchaseDetail = sequelize.define('PurchaseDetail', {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    purchase_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    product_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    batch_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    quantity: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    unit_price: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false
+    },
+    subtotal: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false
+    },
+    expiry_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true
+    },
+    batch_number: {
+      type: DataTypes.STRING(50),
+      allowNull: true
+    }
+  }, {
+    tableName: 'purchase_details',
+    timestamps: false,
+    underscored: true
+  });
+
+  return PurchaseDetail;
+};
+

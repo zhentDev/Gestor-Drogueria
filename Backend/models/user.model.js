@@ -11,18 +11,18 @@ module.exports = (sequelize, DataTypes) => {
     // Nuevos campos para tipo y número de documento
     tipo_doc: {
       type: DataTypes.ENUM('CC', 'NIT', 'CE', 'PAS'), // Añadir tipos de documento comunes
-      allowNull: false,
+      allowNull: true,
       defaultValue: 'CC'
     },
     num_doc: {
       type: DataTypes.STRING(20), // Asumiendo un número de documento puede ser de hasta 20 caracteres
-      allowNull: false,
+      allowNull: true,
       unique: true // El número de documento debe ser único
     },
     // username ahora puede ser generado si no se provee
     username: {
       type: DataTypes.STRING(50),
-      allowNull: true, // Se hará opcional
+      allowNull: false, // Se hará opcional
       unique: true
     },
     password: {
@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
     // Campos separados para nombre y apellido
     name: {
       type: DataTypes.STRING(100),
-      allowNull: false
+      allowNull: true
     },
     last_name: {
       type: DataTypes.STRING(100),

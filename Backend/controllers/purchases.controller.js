@@ -33,7 +33,7 @@ class PurchaseController {
   });
 
   // POST /api/purchases
-  create = catchAsync(async (req, res) => {
+  create = catchAsync(async (req, res) => { 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       throw AppError.badRequest('Datos de entrada inválidos', errors.array(), 'BAD_REQUEST');
@@ -42,8 +42,9 @@ class PurchaseController {
     // El user_id se obtiene del token de autenticación
     const purchaseData = {
       ...req.body,
-      user_id: req.user.userId
+      user_id: req.user.id
     };
+    
 
     const purchase = await purchaseService.create(purchaseData);
     

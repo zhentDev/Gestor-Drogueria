@@ -55,14 +55,17 @@ class PurchaseService {
 
     // Generar número de factura único
     const invoiceNumber = await this.generateInvoiceNumber();
+
+    let purchase; // declare outside
     try {
-      const purchase = await Purchase.create({
+      purchase = await Purchase.create({
         ...purchaseData,
         invoice_number: invoiceNumber,
       });
     } catch (err) {
       throw new AppError(`Error creando la compra- (${err.message})`, 500);
     }
+
     // Retornar con las relaciones incluidas
     return await this.getById(purchase.id);
   }

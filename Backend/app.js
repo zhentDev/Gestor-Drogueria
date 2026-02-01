@@ -43,7 +43,7 @@ if (process.env.NODE_ENV === "development") {
 app.use("/api/auth", require("./routes/auth.routes")); //app.use('/api/users', require('./routes/users.routes'));
 app.use("/api/users", require("./routes/user.routes"));
 app.use('/api/purchases', require('./routes/purchases.routes'));
-
+app.use('/api/purchase-details', require('./routes/purchase-details.routes'));
 // Routes
 /* 
 app.use('/api/products', require('./routes/products.routes')); 

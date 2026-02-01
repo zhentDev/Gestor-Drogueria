@@ -79,6 +79,8 @@ GET /api/products/search?name={partial_name}
     }
   ]
 }
+
+NOTA, status tiene que ser pendinete, completado, o cancelada
 ```
 
 #### 🎯 Funcionalidades Adicionales:

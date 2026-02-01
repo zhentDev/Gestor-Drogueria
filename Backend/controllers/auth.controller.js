@@ -5,7 +5,7 @@ const catchAsync = require('../utils/catchAsync.utils');
 const AppError = require('../utils/appError.utils');
 
 class AuthController {
-  // POST /auth/login
+  // POST /auth/login 
   login = catchAsync(async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

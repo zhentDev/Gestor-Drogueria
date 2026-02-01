@@ -41,7 +41,7 @@ const createPurchaseValidation = [
   body('status')
     .optional()
     .isIn(['pendiente', 'completada', 'cancelada'])
-    .withMessage('Estado inválido'),
+    .withMessage('El estado debe ser pendiente, completada o cancelada'),
   
   body('notes')
     .optional()
