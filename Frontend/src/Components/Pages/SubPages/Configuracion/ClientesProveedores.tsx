@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Send, XCircle, Plus, FileEdit, Download, Users } from "lucide-react";
+import { Send, XCircle, Plus, FileEdit, Users } from "lucide-react";
 import { useTableControls } from "../../../../hooks/useTableControls";
 import { TableControls } from "../../../TableControls";
 

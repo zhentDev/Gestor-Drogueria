@@ -35,6 +35,8 @@ interface NavBarProps {
   functionButton: () => void;
 }
 
+import UpdateNotification from "../../Components/UpdateNotification";
+
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
@@ -90,6 +92,7 @@ function App() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
+      <UpdateNotification />
       {location.pathname !== PATHS.LOGIN && (
         user ? (
           <Navigation textButton="Logout" functionButton={handleLogOut} />

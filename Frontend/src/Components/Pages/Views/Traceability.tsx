@@ -1,8 +1,17 @@
+interface Product {
+    id: number;
+    name: string;
+    manufacturer: string;
+    quantity: number;
+    unit: string;
+}
+
 interface TraceabilityProps {
+  product: Product;
   onClose: () => void;
 }
 
-const Traceability: React.FC<TraceabilityProps> = ({ onClose }) => {
+const Traceability: React.FC<TraceabilityProps> = ({ product: _product, onClose }) => {
   return (
     <div className="flex flex-wrap w-full justify-start items-start h-full flex-col gap-5">
       <div className="w-screen h-fit m-5 p-3 border-2 border-rose-500 rounded-lg flex flex-col items-center justify-center flex-wrap shadow-md shadow-slate-400 drop-shadow-xl gap-6">

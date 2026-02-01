@@ -52,10 +52,10 @@ interface NewUserData {
 }
 
 
-interface Role {
-  id: number;
-  nombre: string;
-}
+// interface Role {
+//   id: number;
+//   nombre: string;
+// }
 
 const rolesOptions = ['admin', 'vendedor', 'cajero'];
 
@@ -280,6 +280,7 @@ const EmpleadosPermisos: React.FC = () => {
               <div className="max-w-2xl mx-auto animate-in slide-in-from-bottom-4 duration-500">
                 <p className="text-center font-bold text-gray-600 mb-8 italic">Los siguientes son datos únicos por cada usuario de su droguería</p>
                 {error && <div className="mb-4 text-red-500 text-center font-bold">{error}</div>}
+                {successMessage && <div className="mb-4 text-green-500 text-center font-bold">{successMessage}</div>}
                 <div className="space-y-6">
                   {step === 1 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50 rounded-xl border border-gray-100">

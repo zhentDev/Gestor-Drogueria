@@ -1,12 +1,21 @@
 import SingleSelect from "@/Components/SingleSelect";
 import React from "react";
 
+interface Product {
+    id: number;
+    name: string;
+    manufacturer: string;
+    quantity: number;
+    unit: string;
+}
+
 interface DetailsProductProps {
   isOpen: boolean;
   onClose: () => void;
+  product: Product;
 }
 
-const DetailsProduct: React.FC<DetailsProductProps> = ({ isOpen, onClose }) => {
+const DetailsProduct: React.FC<DetailsProductProps> = ({ isOpen, onClose, product: _product }) => {
   if (!isOpen) {
     return null;
   }

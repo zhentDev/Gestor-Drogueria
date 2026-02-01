@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom"; // Importar useLoca
 import { User } from "../App/App"; // Importar la interfaz User desde App.tsx
 
 interface LoginProps {
-  setUser: React.Dispatch<React.SetStateAction<User>>;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 const Login: React.FC<LoginProps> = ({ setUser }) => {
