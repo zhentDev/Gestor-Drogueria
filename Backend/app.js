@@ -44,6 +44,8 @@ app.use("/api/auth", require("./routes/auth.routes")); //app.use('/api/users', r
 app.use("/api/users", require("./routes/user.routes"));
 app.use('/api/purchases', require('./routes/purchases.routes'));
 app.use('/api/purchase-details', require('./routes/purchase-details.routes'));
+app.use('/api/sales', require('./routes/sales.routes'));
+app.use('/api/sale-details', require('./routes/sale-details.routes'));
 // Routes
 /* 
 app.use('/api/products', require('./routes/products.routes')); 

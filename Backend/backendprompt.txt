@@ -291,31 +291,120 @@ class PurchaseService {
 module.exports = new PurchaseService();
 
 
-So, I want this for purchase_detail.model.js whcih is :
+So, I want this for sales.model.js whcih is :
+and for sale_detail.model.js
 
 Business rules:
-- A purchase can have many purchase_details.
-- purchase_details can only be created/updated/deleted while purchase.status = 'pendiente'.
+- A sale can have sale details.
+- sales can only be created/updated/deleted while purchase.status = 'pendiente'.
 - Subtotals must be calculated in the backend.
-- purchase_detail should never affect existing purchases or authentication logic.
-
+- sales_detail should never affect existing purchases or authentication logic.
 
 Also add the body content of the POST, UPDATE requests
+
 // =============================================
-// models/purchase_detail.model.js (ACTUALIZADO)
+// models/sale.model.js (ACTUALIZADO)
 // =============================================
+// models/sale.model.js - CORREGIDO
 module.exports = (sequelize, DataTypes) => {
-  const PurchaseDetail = sequelize.define('PurchaseDetail', {
+  const Sale = sequelize.define('Sale', {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true
     },
-    purchase_id: {
+    invoice_number: {
+      type: DataTypes.STRING(50),
+      unique: true,
+      allowNull: false
+    },
+    customer_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    cash_register_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    sale_date: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
+    },
+    subtotal: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0
+    },
+    tax: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0
+    },
+    discount: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0
+    },
+    total: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false
+    },
+    payment_method: {
+      type: DataTypes.STRING(20),
+      defaultValue: 'efectivo'
+    },
+    amount_paid: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true
+    },
+    change_amount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true
+    },
+    status: {
+      type: DataTypes.STRING(20),
+      defaultValue: 'completada'
+    },
+    notes: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    created_at: {  // ❌ FALTABA ESTE CAMPO
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+      field: 'created_at'
+    }
+  }, {
+    tableName: 'sales',
+    timestamps: false,
+    underscored: true  // ✅ Agregar esto para consistencia
+  });
+
+  return Sale;
+};
+
+sale_detail.model.js
+
+// =============================================
+// models/sale_detail.model.js (ACTUALIZADO)
+// =============================================
+module.exports = (sequelize, DataTypes) => {
+  const SaleDetail = sequelize.define('SaleDetail', {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    sale_id: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
     product_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    product_presentation_id: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
@@ -331,24 +420,19 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false
     },
+    discount: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0
+    },
     subtotal: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false
-    },
-    expiry_date: {
-      type: DataTypes.DATEONLY,
-      allowNull: true
-    },
-    batch_number: {
-      type: DataTypes.STRING(50),
-      allowNull: true
     }
   }, {
-    tableName: 'purchase_details',
+    tableName: 'sale_details',
     timestamps: false,
     underscored: true
   });
 
-  return PurchaseDetail;
+  return SaleDetail;
 };
-

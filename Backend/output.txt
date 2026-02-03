@@ -1,0 +1,45 @@
+--- Setting up Database ---
+Tables created.
+Triggers created.
+--- Seeding Data ---
+--- Executing Purchase (Validating Purchase Trigger) ---
+Batch created: {
+  id: 1,
+  product_id: 1,
+  batch_number: 'LOTE-1-1',
+  expiry_date: '2028-02-02',
+  quantity: 10,
+  initial_quantity: 10,
+  unit_cost: 50,
+  purchase_id: 1,
+  location: null,
+  is_active: 1,
+  created_at: '2026-02-02 23:57:53',
+  updated_at: '2026-02-02 23:57:53'
+}
+Purchase Inventory Movements: 1
+Purchase trigger working OK.
+--- Executing Sale (Validating Sale Trigger) ---
+An error occurred: Error: SQLITE_ERROR: table inventory_movements has no column named created_at
+--> in Database#exec('\n' +
+  '            INSERT INTO sale_details (sale_id, product_id, product_presentation_id, quantity, unit_price, subtotal)\n' +
+  '            VALUES (1, 1, 1, 2, 1000, 2000);\n' +
+  '        ', [Function (anonymous)])
+    at C:\Users\maico_c6yntql\Documents\Proyectos\Gestor-Drogueria\Backend\reproduce_issue.js:13:12
+    at new Promise (<anonymous>)
+    at runAsync (C:\Users\maico_c6yntql\Documents\Proyectos\Gestor-Drogueria\Backend\reproduce_issue.js:12:12)
+    at main (C:\Users\maico_c6yntql\Documents\Proyectos\Gestor-Drogueria\Backend\reproduce_issue.js:104:15) {
+  errno: 1,
+  code: 'SQLITE_ERROR',
+  __augmented: true
+}
+Error message: SQLITE_ERROR: table inventory_movements has no column named created_at
+Stack: Error: SQLITE_ERROR: table inventory_movements has no column named created_at
+--> in Database#exec('\n' +
+  '            INSERT INTO sale_details (sale_id, product_id, product_presentation_id, quantity, unit_price, subtotal)\n' +
+  '            VALUES (1, 1, 1, 2, 1000, 2000);\n' +
+  '        ', [Function (anonymous)])
+    at C:\Users\maico_c6yntql\Documents\Proyectos\Gestor-Drogueria\Backend\reproduce_issue.js:13:12
+    at new Promise (<anonymous>)
+    at runAsync (C:\Users\maico_c6yntql\Documents\Proyectos\Gestor-Drogueria\Backend\reproduce_issue.js:12:12)
+    at main (C:\Users\maico_c6yntql\Documents\Proyectos\Gestor-Drogueria\Backend\reproduce_issue.js:104:15)
