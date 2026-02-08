@@ -56,6 +56,10 @@ app.use('/api/customers', require('./routes/customers.routes'));
 // app.use('/api/cash', require('./routes/cash.routes'));
 // app.use('/api/reports', require('./routes/reports.routes')); */
 
+app.use('/api/audit-logs', require('./routes/audit_log.routes'));
+app.use('/api/cash-registers', require('./routes/cash_register.routes'));
+app.use('/api/cash-movements', require('./routes/cash_movement.routes'));
+
 // Error handling middleware
 app.use(require("./middlewares/notFound.middleware")); // 404 handler
 app.use(require("./middlewares/error.middleware"));
