@@ -90,6 +90,7 @@ CREATE TABLE customers (
     email VARCHAR(100),
     address TEXT,
     birth_date DATE,
+    is_active BOOLEAN DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

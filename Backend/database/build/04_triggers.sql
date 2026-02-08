@@ -213,8 +213,6 @@ BEGIN
         pb.quantity,
         OLD.unit_price,
         pu.user_id,
-        CURRENT_TIMESTAMP,
-        CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
     FROM product_batches pb
     INNER JOIN purchases pu ON pu.id = OLD.purchase_id
@@ -343,9 +341,7 @@ BEGIN
         quantity_after,
         unit_cost,
         user_id,
-        movement_date,
-        created_at,
-        updated_at
+        movement_date
     )
     SELECT 
         sd.product_id,
@@ -359,8 +355,6 @@ BEGIN
         pb.quantity, -- Quantity after
         pb.unit_cost, -- Cost from batch
         NEW.user_id,
-        CURRENT_TIMESTAMP,
-        CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
     FROM sale_details sd
     INNER JOIN product_batches pb ON pb.id = sd.batch_id
@@ -414,9 +408,7 @@ BEGIN
         quantity_after,
         unit_cost,
         user_id,
-        movement_date,
-        created_at,
-        updated_at
+        movement_date
     )
     SELECT 
         sd.product_id,
@@ -430,8 +422,6 @@ BEGIN
         pb.quantity, -- Current quantity (after adding back)
         pb.unit_cost,
         NEW.user_id,
-        CURRENT_TIMESTAMP,
-        CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
     FROM sale_details sd
     INNER JOIN product_batches pb ON pb.id = sd.batch_id
@@ -540,9 +530,7 @@ BEGIN
         quantity_after,
         unit_cost,
         user_id,
-        movement_date,
-        created_at,
-        updated_at
+        movement_date
     )
     SELECT 
         NEW.product_id,
@@ -556,8 +544,6 @@ BEGIN
         pb.quantity,
         pb.unit_cost,
         s.user_id,
-        CURRENT_TIMESTAMP,
-        CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
     FROM sale_details sd
     INNER JOIN product_batches pb ON pb.id = sd.batch_id
@@ -605,9 +591,7 @@ BEGIN
         quantity_after,
         unit_cost,
         user_id,
-        movement_date,
-        created_at,
-        updated_at
+        movement_date
     )
     SELECT 
         OLD.product_id,
@@ -621,9 +605,8 @@ BEGIN
         pb.quantity,
         pb.unit_cost,
         s.user_id,
-        CURRENT_TIMESTAMP,
-        CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
+
     FROM product_batches pb
     INNER JOIN sales s ON s.id = OLD.sale_id
     INNER JOIN product_presentations pp ON pp.id = OLD.product_presentation_id
@@ -755,28 +738,7 @@ END;
 -- =============================================
 -- 4. TRIGGER: Prevenir ventas sin stock suficiente
 -- =============================================
-DROP TRIGGER IF EXISTS before_sale_detail_insert;
 
-CREATE TRIGGER before_sale_detail_insert
-BEFORE INSERT ON sale_details
-BEGIN
-    SELECT CASE
-        WHEN (
-            -- Stock disponible en el lote específico o total
-            SELECT COALESCE(SUM(pb.quantity), 0)
-            FROM product_batches pb
-            WHERE pb.product_id = NEW.product_id
-                AND pb.is_active = 1
-                AND (NEW.batch_id IS NULL OR pb.id = NEW.batch_id)
-        ) < (
-            -- Cantidad requerida en unidades base
-            SELECT NEW.quantity * pp.units_per_presentation
-            FROM product_presentations pp
-            WHERE pp.id = NEW.product_presentation_id
-        )
-        THEN RAISE(ABORT, 'Stock insuficiente para realizar la venta')
-    END;
-END;
 
 -- =============================================
 -- VERIFICAR QUE LOS TRIGGERS SE CREARON

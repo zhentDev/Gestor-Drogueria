@@ -47,12 +47,14 @@ app.use('/api/purchase-details', require('./routes/purchase-details.routes'));
 app.use('/api/sales', require('./routes/sales.routes'));
 app.use('/api/sale-details', require('./routes/sale-details.routes'));
 // Routes
+app.use('/api/products', require('./routes/products.routes'));
+app.use('/api/customers', require('./routes/customers.routes'));
 /* 
-app.use('/api/products', require('./routes/products.routes')); 
-app.use('/api/purchases', require('./routes/purchases.routes'));
-app.use('/api/sales', require('./routes/sales.routes'));
-app.use('/api/cash', require('./routes/cash.routes'));
-app.use('/api/reports', require('./routes/reports.routes')); */
+// app.use('/api/products', require('./routes/products.routes')); 
+// app.use('/api/purchases', require('./routes/purchases.routes'));
+// app.use('/api/sales', require('./routes/sales.routes'));
+// app.use('/api/cash', require('./routes/cash.routes'));
+// app.use('/api/reports', require('./routes/reports.routes')); */
 
 // Error handling middleware
 app.use(require("./middlewares/notFound.middleware")); // 404 handler
